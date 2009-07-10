@@ -1,0 +1,9 @@
+// $ANTLR 2.7.7 (20060906): grammer.g -> MyTokenTypes.txt$
+My    // output token vocab name
+PLUS=4
+SEMI=5
+STAR=6
+INT=7
+WS=8
+LPAREN=9
+RPAREN=10

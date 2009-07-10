@@ -1,0 +1,103 @@
+#ifndef INC_ssci_TokenTypes_hpp_
+#define INC_ssci_TokenTypes_hpp_
+
+/* $ANTLR 2.7.7 (20060906): "grammer.g" -> "ssci_TokenTypes.hpp"$ */
+
+#ifndef CUSTOM_API
+# define CUSTOM_API
+#endif
+
+#ifdef __cplusplus
+struct CUSTOM_API ssci_TokenTypes {
+#endif
+	enum {
+		EOF_ = 1,
+		ID = 4,
+		LPAREN = 5,
+		RPAREN = 6,
+		LCURLY = 7,
+		RCURLY = 8,
+		SEMI = 9,
+		SWITCH = 10,
+		CASE = 11,
+		COLON = 12,
+		DEFAULT = 13,
+		IF = 14,
+		ELSE = 15,
+		WHILE = 16,
+		DO = 17,
+		FOR = 18,
+		ASSIGN = 19,
+		INC_OP = 20,
+		DEC_OP = 21,
+		LBRACKET = 22,
+		RBRACKET = 23,
+		ADD_ASSIGN = 24,
+		SUB_ASSIGN = 25,
+		DIV_ASSIGN = 26,
+		STAR_ASSIGN = 27,
+		MOD_ASSIGN = 28,
+		COMMA = 29,
+		COUT = 30,
+		LSHIFT = 31,
+		ENDL = 32,
+		LOR = 33,
+		LAND = 34,
+		EQUAL = 35,
+		NOT_EQUAL = 36,
+		LT_OP = 37,
+		GT = 38,
+		LTE = 39,
+		GTE = 40,
+		PLUS = 41,
+		MINUS = 42,
+		STAR = 43,
+		DIV = 44,
+		MOD = 45,
+		LNOT = 46,
+		STRING_LITERAL = 47,
+		CHAR_LITERAL = 48,
+		DOUBLE_CONST = 49,
+		INT_CONST = 50,
+		TRUE = 51,
+		FALSE = 52,
+		CHAR = 53,
+		INT = 54,
+		BOOL = 55,
+		DOUBLE = 56,
+		STRING = 57,
+		NRootAST = 58,
+		NDeclaration = 59,
+		NUnionDeclaration = 60,
+		NUnary = 61,
+		NEmptyStatement = 62,
+		NInitializer = 63,
+		NExterntype = 64,
+		NCondition = 65,
+		NCodeBlock = 66,
+		NIfThenBlock = 67,
+		NIfBlock = 68,
+		NElseBlock = 69,
+		NForBlock = 70,
+		NCaseStatement = 71,
+		NDefaultStatement = 72,
+		NSwitchBlock = 73,
+		NCaseCondition = 74,
+		NForDeclaration = 75,
+		NDeclareList = 76,
+		NListDeclaration = 77,
+		NAssignList = 78,
+		NStartCondition = 79,
+		Whitespace = 80,
+		Cpp_Comment = 81,
+		Comment = 82,
+		DOT = 83,
+		Escape = 84,
+		DIGIT = 85,
+		NUMBER = 86,
+		NULL_TREE_LOOKAHEAD = 3
+	};
+#ifdef __cplusplus
+};
+#endif
+#endif /*INC_ssci_TokenTypes_hpp_*/
