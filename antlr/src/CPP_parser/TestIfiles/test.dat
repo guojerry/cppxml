@@ -1,0 +1,13 @@
+Centre for Systems and Software Engineering
+London South Bank University
+
+ANTLR C++ Parsing Project
+Version 3.2 November 2007
+
+Program to demonstrate subclassing of application code
+
+Parse e:\Learn\ANTLR\src\CPP_parser\TestIfiles\test.cpp Fri Jul 10 18:25:15 2009
+
+See list of 2 functions in e:\Learn\ANTLR\src\CPP_parser\TestIfiles\test.lis
+
+Also see optional list in e:\Learn\ANTLR\src\CPP_parser\TestIfiles\test.log
