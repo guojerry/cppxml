@@ -86,6 +86,8 @@
 #include "MyCode.hpp"
 #endif MYCODE
 
+static FILE* g_hOutputFile = NULL;
+
 ANTLR_USING_NAMESPACE(std)
 ANTLR_USING_NAMESPACE(antlr)
 
@@ -97,7 +99,10 @@ void myDebugOutputA(const char* format, ...)
 	_vsnprintf(szData, 1023, format, argptr);
 	va_end(argptr);
 
-	OutputDebugStringA(szData);
+	if(g_hOutputFile)
+		fprintf(g_hOutputFile, szData);
+	else
+		OutputDebugStringA(szData);
 }
 
 void indent(int indent_level)
@@ -160,6 +165,17 @@ int main(int argc,char* argv[])
 		// close input file
 		fclose(input_file_ptr);
 
+	char szOutputFileName[MAX_PATH] = {0};
+	strcpy(szOutputFileName, argv[1]);
+	int idx = strlen(szOutputFileName);
+	while((szOutputFileName[idx] != '.') && (idx > 0))
+	{
+		szOutputFileName[idx] = '\0';
+		idx -= 1;
+	}
+	strcat(szOutputFileName, "ast");
+	g_hOutputFile = fopen(szOutputFileName, "w");
+
 	char *f = argv[1];
 
 	try {
@@ -214,6 +230,9 @@ int main(int argc,char* argv[])
 		return -1;	// Put in 30/10/07
 		}
 	printf("\nParse ended\n");
+	fclose(g_hOutputFile);
+	g_hOutputFile = NULL;
+
 //	getch();
 	return 0;
 	}

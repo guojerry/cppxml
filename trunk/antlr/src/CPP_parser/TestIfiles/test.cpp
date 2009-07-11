@@ -1,9 +1,9 @@
-#line 0 "test.h"
-
+//#line 0 "test.cpp"
+#pragma warning(disable:4430)
 namespace test_case
 {
-
 /*
+
 char s3[256] = {0};
 char s4[2][120];
 
@@ -46,14 +46,17 @@ void data::data_1::MyFunc_1()
 {
 
 }
-*/
 
+*/
+/*
 namespace test_case_template_1
 {
 
 	template<typename T>
 	class Another
 	{
+		template<class Basic>
+		Another(Basic an) {}
 	};
 
 	template <class Key,  class T, class Compare = Another<Key>,  template <class> class Alloc = Another>
@@ -93,6 +96,16 @@ test_case_template_1::YetAnother<Key, T, Compare, Alloc>::YetAnother()
 {
 }
 
+
+namespace test_case_template_2
+{
+	template<class R, typename A1, typename A2>
+	R CallLua(A1 a1, A2 a2)
+	{
+		return R(a1, a2);
+	}
+}
+*/
 /*
 template<typename T, class S>
 class MyTemplate
@@ -106,6 +119,33 @@ private:
 	T* m_pData;
 	S* m_pS;
 };
+
+namespace test_case_declaration_1
+{
+	MyTemplate<int, int> returnTemplate(int a, char* b = 0)
+	{
+		return MyTemplate<int, int>(0);
+	}
+
+	void setname(const char* sname);
+	bool (isdigit)();
+	
+	int first, getname(int id);
+	int (digits)[1][1];
+
+	class TestDeclaration
+	{
+	public:
+		virtual void what() = 0;
+		virtual int second(), getline(int id) = 0, (getvalue)(char ch);
+		virtual defaultreturn();
+		virtual defaultreturn2()
+		{
+			return 0;
+		}
+	};
+}
+
 
 namespace test_case_interface_1
 {
@@ -157,18 +197,91 @@ char param1;char* param2;
 }
 
 extern int g_count;
+
+namespace test_case_function_typedef
+{
+	class STUDENT;
+	typedef struct tagSTUDENT
+	{
+		int nID;
+		char szName[256];
+		typedef struct tagScore
+		{
+			int nMath;
+			int nEnglish;
+		}SCORE,*LPSCORE;
+		SCORE oScore;
+	}STUDENT,*LPSTUDENT;
+	STUDENT st;
+
+	struct tagIP
+	{
+		int nIP;
+	} aIP;
+	struct tagIP bIp = aIP;
+
+	int callback(int idx, void* pParam)
+	{
+		return 0;
+	}
+
+	typedef int INT;
+	typedef int (*CALLBACK)(int idx, void* pParam);
+	int (*cb2)(int idx, void* pParam) = callback;
+	CALLBACK cb = callback;
+
+	int sum(int a, int b){return a+b;}
+	int subtract(int a, int b){return a-b;}
+	int mul(int a, int b){return a*b;}
+	int div(int a, int b){return a/b;}
+
+	int (*p[4]) (int x, int y) = {
+		sum, subtract, mul, div
+	} ;
+	void printf(const char* format, ...);
+}
 */
+
+namespace test_case_enum_union
+{
+	class Display;
+	Display* g_display;
+
+	typedef enum tagMediaType{
+		ePhoto = 1,
+		eMusic = 2,
+		eAll = ePhoto | eMusic,
+	}MEDIATYPE;
+
+	MEDIATYPE eMedia;
+
+	enum
+	{
+		eVisible,
+		eUnVisible,
+	}vis;
+	typedef struct in_addr 
+	{
+		union {
+			struct { unsigned char s_b1,s_b2,s_b3,s_b4; } S_un_b;
+			struct { unsigned short s_w1,s_w2; } S_un_w;
+			unsigned long S_addr;
+		} S_un;
+	}INADDR;
+}
+
 //-class ctor initialize, base class, template
-//class function with scope.
-//class static declaration.
-//Function Pointer, enum, union, typedef, 
+//-class function with scope.
+//-class static declaration.
+//-namespace
+//-function parameter initialize, Function Pointer, typedef,...
+//-friend,extern,enum, union
+//class member function 
 //Statements: assign, if then, do while, for, return, continue, break,
 //Expression: condition expression, arithmetic expression, ++/--/+=/-=/...
 //go to, label
 //throw, catch
-//namespace
 //cout <<, operator reload
-//function parameter initialize, ...
 //Replace import node with special classes.
 //XML exports
 }

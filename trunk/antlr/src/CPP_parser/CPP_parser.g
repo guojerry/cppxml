@@ -431,13 +431,14 @@ external_declaration
 			{if(statementTrace>=1) 
 				printf("%d external_declaration Typedef enum type\n",LT(1)->getLine());
 			}
-			"typedef" enum_specifier {_td = true;} (init_declarator_list)? SEMICOLON {end_of_stmt();}
+			"typedef"! enum_specifier {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+			{#external_declaration = #(#[MYTYPEDEF, "typedef"], #external_declaration);}
 		|
 			(declaration_specifiers function_declarator[0] SEMICOLON)=>	// DW 11/02/05 This may not be possible
 			{if(statementTrace>=1) 
 				printf("%d external_declaration Typedef function type\n",LT(1)->getLine());
 			}
-			declaration
+			function_declaration
 		|
 			(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 			{if(statementTrace>=1) 
@@ -449,7 +450,8 @@ external_declaration
 			{if(statementTrace>=1) 
 				printf("%d external_declaration Typedef class type\n",LT(1)->getLine());
 			}
-			"typedef" class_decl_or_def[fs] {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+			"typedef"! class_decl_or_def[fs] {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+			{#external_declaration = #(#[MYTYPEDEF, "typedef"], #external_declaration);}
 		)
 	|	
 		// Class template declaration or definition
@@ -465,7 +467,8 @@ external_declaration
 		{if (statementTrace>=1) 
 			printf("%d external_declaration Enum definition\n",LT(1)->getLine());
 		}
-		enum_specifier (init_declarator_list)? SEMICOLON {end_of_stmt();}
+		enum_specifier (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+		{#external_declaration = #(#[MYDECLAR, "declaration"], #external_declaration);}
 	|
 		// Destructor definition (templated or non-templated)
 		((template_head)? dtor_head[1] LCURLY)=>
@@ -500,7 +503,7 @@ external_declaration
 		{if (statementTrace>=1) 
 			printf("%d external_declaration Function declaration\n",LT(1)->getLine());
 		}
-		declaration_specifiers function_declarator[0] SEMICOLON {end_of_stmt();}
+		function_declaration
 	|
 		// Function definition
 		(declaration_specifiers	function_declarator[1] LCURLY)=> 
@@ -537,7 +540,8 @@ external_declaration
 		{if (statementTrace>=1) 
 			printf("%d external_declaration Class decl or def\n",LT(1)->getLine());
 		}
-		("extern")? (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+		("extern"!)? (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+		{#external_declaration = #(#[MYDECLAR, "declaration"], #external_declaration);}
 	|
 		// Copied from member_declaration 31/05/07
 		(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
@@ -562,7 +566,7 @@ external_declaration
 			{if (statementTrace>=1) 
 				printf("%d external_declaration Templated function declaration\n",LT(1)->getLine());
 			}
-			declaration
+			function_declaration
 		|  
 			// Templated function definition
 			(declaration_specifiers function_declarator[1] LCURLY)=> 
@@ -595,7 +599,7 @@ external_declaration
 		{if (statementTrace>=1) 
 			printf("%d external_declaration Semicolon\n",LT(1)->getLine());
 		}
-		SEMICOLON {end_of_stmt();}
+		SEMICOLON! {end_of_stmt();}
 	|	
 		// Anything else 
 		{if (statementTrace>=1) 
@@ -658,13 +662,14 @@ member_declaration
 			{if(statementTrace>=1) 
 				printf("%d member_declaration Typedef enum type\n",LT(1)->getLine());
 			}
-			"typedef" enum_specifier {_td = true;} (init_declarator_list)? SEMICOLON {end_of_stmt();}
+			"typedef" enum_specifier {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+			{#member_declaration = #(#[MYTYPEDEF, "typedef"], #member_declaration);}
 		|
 			(declaration_specifiers function_declarator[0] SEMICOLON)=>	// DW 11/02/05 This may not be possible member declaration
 			{if(statementTrace>=1) 
 				printf("%d member_declaration Typedef function type\n",LT(1)->getLine());
 			}
-			declaration
+			function_declaration
 		|
 			(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 			{if(statementTrace>=1) 
@@ -677,6 +682,7 @@ member_declaration
 				printf("%d member_declaration Typedef class type\n",LT(1)->getLine());
 			}
 			"typedef" class_decl_or_def[fs] {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+			{#member_declaration = #(#[MYTYPEDEF, "typedef"], #member_declaration);}
 		)
 	|	
 		// Templated class declaration or definition
@@ -685,13 +691,15 @@ member_declaration
 			printf("%d member_declaration Templated class decl or def\n",LT(1)->getLine());
 		}
 		template_head (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}	// declaration
+		{#member_declaration = #(#[MYTEMPLATE, "templatepro"], #member_declaration);}
 	|  
 		// Enum definition (don't want to backtrack over this in other alts)
 		("enum" (ID)? LCURLY)=>
 		{if (statementTrace>=1) 
 			printf("%d member_declaration Enum definition\n",LT(1)->getLine());
 		}
-		enum_specifier (init_declarator_list)? SEMICOLON	{end_of_stmt();}
+		enum_specifier (init_declarator_list)? SEMICOLON!	{end_of_stmt();}
+		{#member_declaration = #(#[MYDECLAR, "declaration"], #member_declaration);}
 	|
 		// Constructor declarator
 		(	ctor_decl_spec
@@ -746,8 +754,7 @@ member_declaration
 		{if (statementTrace>=1) 
 			printf("%d member_declaration Function declaration\n",LT(1)->getLine());
 		}
-		declaration_specifiers function_declarator[0] SEMICOLON! {end_of_stmt();}
-		{#member_declaration = #(#[MYFUNCTION, "function"], #member_declaration);}
+		function_declaration
 	|  
 		// Function definition
 		(declaration_specifiers function_declarator[1] LCURLY)=>
@@ -755,7 +762,6 @@ member_declaration
 			printf("%d member_declaration Function definition\n",LT(1)->getLine());
 		}
 		function_definition
-		{#member_declaration = #(#[MYFUNCTION, "function"], #member_declaration);}
 	|  
 		// User-defined type cast
 		(("inline")? conversion_function_decl_or_def)=>
@@ -778,7 +784,8 @@ member_declaration
 		{if (statementTrace>=1) 
 			printf("%d member_declaration Class decl or def\n",LT(1)->getLine());
 		}
-		("friend")? (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+		("friend"!)? (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}
+		{#member_declaration = #(#[MYDECLAR, "declaration"], #member_declaration);}
 	|  
 		(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 		{if (statementTrace>=1) 
@@ -792,7 +799,8 @@ member_declaration
 		 if (statementTrace>=1) 
 			printf("%d member_declaration Function declaration\n",LT(1)->getLine());
 		}
-		(fs = function_specifier)* function_declarator[0] SEMICOLON {end_of_stmt();}
+		(fs = function_specifier)* function_declarator[0] SEMICOLON! {end_of_stmt();}
+		{#member_declaration = #(#[MYFUNCTION, "function"], #member_declaration);}
 	|
 		// Member without a type (I guess it can only be a function definition)
 		((fs = function_specifier)* function_declarator[1] LCURLY)=>
@@ -801,6 +809,7 @@ member_declaration
 			printf("%d member_declaration Function definition without return type\n",LT(1)->getLine());
 		}
 		(fs = function_specifier)* function_declarator[1] compound_statement {endFunctionDefinition();}
+		{#member_declaration = #(#[MYFUNCTION, "function"], #member_declaration);}
 	|  
 		// Templated functions and constructors matched here.
 		{beginTemplateDeclaration();}
@@ -818,7 +827,7 @@ member_declaration
 			{if (statementTrace>=1) 
 				printf("%d member_declaration Templated function declaration\n",LT(1)->getLine());
 			}
-			declaration
+			function_declaration
 		|  
 			// Templated function definition
 			(declaration_specifiers function_declarator[1] LCURLY)=> 
@@ -860,6 +869,7 @@ member_declaration
 			class_head declaration
 		)
 		{endTemplateDeclaration();}
+		{#member_declaration = #(#[MYTEMPLATE, "templatepro"], #member_declaration);}
 	|!
 		// Access specifier  
 		{if (statementTrace>=1) 
@@ -916,7 +926,12 @@ declaration
 	|	
 		using_statement
 	)
-	{#declaration = #(#[MYDECLAR, "declaration"], #declaration);}
+	{
+	 if(_td==true)
+		#declaration = #(#[MYTYPEDEF, "typedef"], #declaration);
+	 else
+		#declaration = #(#[MYDECLAR, "declaration"], #declaration);
+	}
 	;
 
 //linkage_specification
@@ -965,7 +980,7 @@ declaration_specifiers
 
 	}
 	(	(options {warnWhenFollowAmbig = false;}
-		:	"typedef"	{td=true;}			
+		:	"typedef"!	{td=true;}			
 		|	"friend"	{fd=true;}
 		|	sc = storage_class_specifier	// auto,register,static,extern,mutable
 		|	tq = type_qualifier		// const,volatile	// aka cv_qualifier See type_qualifier
@@ -1091,13 +1106,14 @@ type_qualifier returns [CPPParser::TypeQualifier tq = tqInvalid] // aka cv_quali
 class_decl_or_def [FunctionSpecifier fs] 
 	{char *saveClass; 
 	 data id;
+	 data typeName;
 	 char qid[CPPParser_MaxQualifiedItemSize+1];
 	 TypeSpecifier ts = tsInvalid;	// Available for use
 	}
 	:	
-		("class"!	{ts = tsCLASS;}	
-		|"struct"!	{ts = tsSTRUCT;}
-		|"union"!	{ts = tsUNION;}
+		("class"!	{ts = tsCLASS;typeName="class";}	
+		|"struct"!	{ts = tsSTRUCT;typeName="class";}
+		|"union"!	{ts = tsUNION;typeName="union";}
 		)
 		(("_declspec"|"__declspec") LPAREN expression RPAREN)*	// Temp for Evgeniy
 		(	id = qualified_id
@@ -1125,7 +1141,7 @@ class_decl_or_def [FunctionSpecifier fs]
 			RCURLY!
 			{enclosingClass = saveClass;}
 		)
-		{#class_decl_or_def = #(#[MYCLASS, "class"], #class_decl_or_def);}
+		{#class_decl_or_def = #(#[MYCLASS, typeName.c_str()], #class_decl_or_def);}
 	;
 
 //base_clause
@@ -1161,28 +1177,30 @@ enum_specifier
 	data id;
 	}
 	:	
-		"enum"
+		"enum"!
 		(	
-			LCURLY enumerator_list RCURLY
+			LCURLY! enumerator_list RCURLY!
 		|	
 			id = qualified_id
 			{beginEnumDefinition(id.c_str());}	// This stores id name as an enum type in dictionary
-			(LCURLY enumerator_list RCURLY)?
+			(LCURLY! enumerator_list RCURLY!)?
 			{endEnumDefinition();}
 		)
+		{#enum_specifier = #(#[MYENUM, "enum"], #enum_specifier);}
 	;
 
 //enumerator_list
 enumerator_list
 	:	
-		enumerator (COMMA (enumerator)? )*	// Allows comma at end of list
+		enumerator (COMMA! (enumerator)? )*	// Allows comma at end of list
 	;
 
 //enumerator
-enumerator
+enumerator!
 	:	
-		id:ID (ASSIGNEQUAL constant_expression)?
+		id:ID (ASSIGNEQUAL! constant_expression{#id->addChild(RefPNode(#(#[MYENUM, "assign"], returnAST)));})?
 		{enumElement((id->getText()).data());}	// This stores id name in dictionary
+		{#enumerator = #id;}
 	;
 
 /* This matches a generic qualified identifier ::T::B::foo
@@ -1240,15 +1258,20 @@ member_declarator!
 	|  
 		d:declarator{#d=returnAST;}
 		(
-			(ASSIGNEQUAL OCTALINT SEMICOLON)=> i:ASSIGNEQUAL OCTALINT	// The value must be zero (for pure virtual)
-			{#i=#(#[MYEXPRESSION,"assign"], OCTALINT);}
+			(ASSIGNEQUAL OCTALINT)=>ASSIGNEQUAL OCTALINT	// The value must be zero (for pure virtual)
+			{#d->addChild(RefPNode(#[MYFUNCTION, "pure"]));}
 		|	
 			ASSIGNEQUAL 
-			initializer{#i=#(#[MYEXPRESSION,"assign"], returnAST);}
+			i:initializer{#i=#(#[MYEXPRESSION,"assign"], returnAST);}
 		|	
 			LPAREN expression_list RPAREN{#i=#(#[MYEXPRESSION, "ctor"], returnAST);}
 		)?
-		{#member_declarator = #(#[MYDECLAR,"variables"], d, i);}
+		{
+		 if(_td==true)
+			#member_declarator = #(#[MYDECLAR,"newtype"], d, i);
+		 else
+			#member_declarator = #(#[MYDECLAR,"variables"], d, i);
+		}
 	;
 
 //initializer
@@ -1256,7 +1279,8 @@ initializer
 	:	
 		remainder_expression	// assignment_expression
 	|	
-		LCURLY initializer (COMMA (initializer)? )* RCURLY	// Allows comma at end of list
+		LCURLY! initializer (COMMA! (initializer)? )* RCURLY!	// Allows comma at end of list
+		{#initializer = #(#[MYDECLAR, "values"], #initializer);}
 	;
 
 //declarator
@@ -1272,21 +1296,10 @@ declarator
 direct_declarator
 	{
 	data id;
-	CPPParser::TypeQualifier tq;
 	}
 	:	
 		(qualified_id LPAREN (RPAREN|declaration_specifiers) )=>	// Must be function declaration
-		id = qualified_id
-		{if (_td==true)       // This statement is a typedef   
-			declaratorID(id.c_str(),qiType);
-		 else
-			declaratorID(id.c_str(),qiFun);
-		}
-		LPAREN {declaratorParameterList(0);}
-		(parameter_list)?
-		RPAREN {declaratorEndParameterList(0);}
-		(tq = type_qualifier)*
-		(exception_specification)?
+		function_inline_declarator
 	|	
 		(qualified_id LPAREN qualified_id)=>	// Must be class instantiation
 		id = qualified_id
@@ -1328,10 +1341,12 @@ direct_declarator
 		 is_address = false; is_pointer = false;
 		}
 	|	
-		LPAREN declarator RPAREN 
+		LPAREN! declarator RPAREN! 
 		(options {warnWhenFollowAmbig = false;}:
 		 declarator_suffix)? // DW 1/9/04 declarator_suffix made optional as failed on line 2956 in metrics.i
-	;							// According to the grammar a declarator_suffix is not required here
+							 // According to the grammar a declarator_suffix is not required here
+		{#direct_declarator = #(#[MYFUNCTION, "function"], #direct_declarator);}
+	;
 
 //declarator_suffix
 declarator_suffix		// Note: Only used above in direct_declarator
@@ -1339,13 +1354,14 @@ declarator_suffix		// Note: Only used above in direct_declarator
 	:
 	(	
 		//(options {warnWhenFollowAmbig = false;}:
-		(LSQUARE (constant_expression)? RSQUARE)+
+		(LSQUARE! (constant_expression)? RSQUARE!)+
 		{declaratorArray();}
+		{#declarator_suffix=#(#[MYDECLAR, "array"], #declarator_suffix);}
 	|	
 		{(!((LA(1)==LPAREN)&&(LA(2)==ID))||(qualifiedItemIsOneOf(qiType|qiCtor,1)))}?
-		LPAREN {declaratorParameterList(0);}
+		LPAREN! {declaratorParameterList(0);}
 		(parameter_list)?
-		RPAREN {declaratorEndParameterList(0);}
+		RPAREN! {declaratorEndParameterList(0);}
 		(tq = type_qualifier)*
 		(exception_specification)?
 	)
@@ -1365,12 +1381,48 @@ conversion_function_decl_or_def
 		)
 	;
 
+//function_declaration
+function_declaration
+	{
+	bool bTypeDef = false;
+	}
+	:
+	declaration_specifiers{bTypeDef=_td;} function_declarator[0] SEMICOLON! {end_of_stmt();}
+	{
+	 if(bTypeDef)
+		#function_declaration = #(#[MYTYPEDEF, "typedef"], #(#[MYFUNCTION, "function"], #function_declaration));
+	 else
+		#function_declaration = #(#[MYFUNCTION, "function"], #function_declaration);
+	}
+	;
+
  //function_declarator
 function_declarator [int definition]
 	:	
 		(ptr_operator)=> ptr_operator function_declarator[definition]
 	|	
 		function_direct_declarator[definition]
+	;
+
+//function_inline_declarator
+function_inline_declarator
+	{
+	data id;
+	CPPParser::TypeQualifier tq;
+	}
+	:
+		id = qualified_id
+		{if (_td==true)       // This statement is a typedef   
+			declaratorID(id.c_str(),qiType);
+		 else
+			declaratorID(id.c_str(),qiFun);
+		}
+		LPAREN! {declaratorParameterList(0);}
+		(parameter_list)?
+		RPAREN! {declaratorEndParameterList(0);}
+		(tq = type_qualifier)*
+		(exception_specification)?
+		{#function_inline_declarator = #(#[MYFUNCTION, "function"], #function_inline_declarator);}
 	;
 
 //function_direct_declarator
@@ -1381,9 +1433,9 @@ function_direct_declarator [int definition]
 	}
 	:
 		(	// fix prompted by (isdigit)() in xlocnum
-			LPAREN 
+			LPAREN! 
 			declarator
-			RPAREN
+			RPAREN!
 		|
 			q = qualified_id
 			{
@@ -1393,7 +1445,7 @@ function_direct_declarator [int definition]
 
 		{		
 #ifdef MYCODE
-//		if (definition)
+		if (definition)
 			myCode_function_direct_declarator(q.c_str());
 #endif MYCODE
 		}
@@ -1538,7 +1590,7 @@ dtor_body
 parameter_list
 	:	
 		parameter_declaration_list (ELLIPSIS)?
-		{#parameter_list = #(#[MYPARAM, "Parameters"], #parameter_list);}
+		{#parameter_list = #(#[MYPARAM, "parameters"], #parameter_list);}
 	;
 
 //parameter_declaration_list
@@ -1547,6 +1599,11 @@ parameter_declaration_list
 		(parameter_declaration (COMMA! parameter_declaration)* )
 	;
 
+parameter_initializer:
+	remainder_expression	// DW 18/4/01 assignment_expression
+	{#parameter_initializer = #(#[MYDECLAR, "assign"], #parameter_initializer);}
+	;
+	
 //parameter_declaration	(See also template_parameter_declaration)
 parameter_declaration
 	:	
@@ -1566,8 +1623,8 @@ parameter_declaration
 		|
 			ELLIPSIS
 		)
-		(ASSIGNEQUAL 
-		 remainder_expression // DW 18/4/01 assignment_expression
+		(ASSIGNEQUAL! 
+		 parameter_initializer 
 		)?
 		{#parameter_declaration = #(#[MYDECLAR, "declaration"],#parameter_declaration);}
 	;
@@ -2500,6 +2557,8 @@ tokens
 	MYCLASS;
 	MYTEMPLATE;
 	MYNAMESPACE;
+	MYTYPEDEF;
+	MYENUM;
 	}
 
 {
