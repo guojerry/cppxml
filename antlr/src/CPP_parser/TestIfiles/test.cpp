@@ -240,7 +240,6 @@ namespace test_case_function_typedef
 	} ;
 	void printf(const char* format, ...);
 }
-*/
 
 namespace test_case_enum_union
 {
@@ -269,7 +268,134 @@ namespace test_case_enum_union
 		} S_un;
 	}INADDR;
 }
+*/
+namespace test_case_template_memberfunctor_declartor
+{
+	typedef int HRESULT;
+	typedef unsigned int WPARAM;
+	typedef unsigned int LPARAM;
 
+	template<typename A1, typename A2, typename A3>
+	class invoker
+	{
+	public:
+		virtual ~invoker() {}
+		virtual HRESULT operator()(A1 _a1, A2 _a2, A3 _a3) const = 0;
+		virtual bool is_functor() const = 0;
+		virtual bool operator==(const invoker& ink) = 0;
+	};
+
+	template<class _Ty, typename T1, typename T2, typename T3>
+	class mem_functor : public invoker<T1, T2, T3>
+	{
+	public:
+		explicit mem_functor(HRESULT (_Ty::*_Pm)(T1, T2, T3), _Ty* _This)
+			: _Ptr(_Pm), _param(_This){}
+
+		virtual HRESULT operator()(T1 _a1, T2 _a2, T3 _a3) const
+		{
+			return 0; 
+		}
+
+		virtual bool is_functor() const
+		{
+			return false; 
+		}
+
+		virtual bool operator==(const invoker<T1, T2, T3>& ink)
+		{ 
+		}
+	private:
+		HRESULT (_Ty::*_Ptr)(T1, T2, T3);
+		_Ty* _param;
+	};
+
+	template<typename A1, typename A2, typename A3>
+	class functor_t : public invoker<A1, A2, A3>
+	{
+	public:
+		typedef HRESULT (*Functor)(A1, A2, A3);
+		explicit functor_t(Functor _Pm)
+			: _Ptr(_Pm){}
+		virtual HRESULT operator()(A1 _a1, A2 _a2, A3 _a3) const
+		{
+			return _Ptr(_a1, _a2, _a3); 
+		}
+
+		virtual bool is_functor() const
+		{
+			return true; 
+		}
+
+		virtual bool operator==(const invoker<A1,A2,A3>& ink)
+		{ 
+		}
+	private:
+		Functor _Ptr;
+	};
+
+	typedef int IRctEventParam;
+
+	__declspec(dllexport) int myExportFunction();
+
+	class __declspec(dllexport) CRctEvetnHandler
+	{
+	public:
+		typedef HRESULT (*Functor)(WPARAM, LPARAM, IRctEventParam*);
+		CRctEvetnHandler() 
+			: functor(0)	{}
+		virtual ~CRctEvetnHandler()
+		{
+		}
+
+		template<class _Ty>
+		CRctEvetnHandler(HRESULT (_Ty::*_Pm)(WPARAM, LPARAM, IRctEventParam*), _Ty* _This, unsigned long _a1)
+		{
+		}
+		CRctEvetnHandler(HRESULT (*_Pm)(WPARAM, LPARAM, IRctEventParam*), unsigned long _a1)
+		{
+		}
+	public:
+	private:
+		invoker<WPARAM, LPARAM, IRctEventParam*>* functor;
+		IRctEventParam* parameter;
+		unsigned long _name;
+	};
+}
+
+/*
+namespace test_case_declaration_2
+{
+	class MyConvertion
+	{
+	public:
+		template<typename T>
+		inline operator T*();
+
+		inline operator int();
+		inline operator()()
+		{
+		}
+		operator[](int i);
+		void* operator*()
+		{
+			return 0;
+		}
+		const MyConvertion& operator=(int i)
+		{
+		}
+	};
+	inline MyConvertion::operator int()
+	{
+		return 0;
+	}
+	inline bool operator==(MyConvertion& a1, MyConvertion& a2)
+	{
+		return false;
+	}
+	
+}
+*/
 //-class ctor initialize, base class, template
 //-class function with scope.
 //-class static declaration.

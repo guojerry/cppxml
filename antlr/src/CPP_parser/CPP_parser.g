@@ -490,13 +490,21 @@ external_declaration
 			printf("%d external_declaration Constructor definition\n",LT(1)->getLine());
 		}
 		ctor_definition
-	|  
+	|!  
 		// User-defined type cast
 		(("inline")? scope_override  conversion_function_decl_or_def)=>
 		{if (statementTrace>=1) 
 			printf("%d external_declaration Operator function\n",LT(1)->getLine());
 		}
-		("inline")? s = scope_override conversion_function_decl_or_def 
+		(m:"inline")? s = sc:scope_override fc:conversion_function_decl_or_def 
+		{
+		 #external_declaration = #[MYFUNCTION, "convertor"];
+		 if(#m != nullAST)
+			#external_declaration->addChild(RefPNode(#(#[MYFUNCTION, "specifier"], #m)));
+		 if(#sc != nullAST)
+			#external_declaration->addChild(RefPNode(#sc));
+ 		 #external_declaration->addChild(RefPNode(#fc));
+		}
 	|   
 		// Function declaration
 		(declaration_specifiers function_declarator[0] SEMICOLON)=> 
@@ -762,13 +770,19 @@ member_declaration
 			printf("%d member_declaration Function definition\n",LT(1)->getLine());
 		}
 		function_definition
-	|  
+	|!  
 		// User-defined type cast
 		(("inline")? conversion_function_decl_or_def)=>
 		{if (statementTrace>=1) 
 			printf("%d member_declaration Operator function\n",LT(1)->getLine());
 		}
-		("inline")? conversion_function_decl_or_def
+		(m:"inline")? fc:conversion_function_decl_or_def
+		{
+		 #member_declaration = #[MYFUNCTION, "convertor"];
+		 if(#m != nullAST)
+			#member_declaration->addChild(RefPNode(#(#[MYFUNCTION, "specifier"], #m)));
+ 		 #member_declaration->addChild(RefPNode(#fc));
+		}
 	|  
 		// Hack to handle decls like "superclass::member",
 		// to redefine access to private base class public members
@@ -855,12 +869,18 @@ member_declaration
 				printf("%d member_declaration Templated constructor definition\n",LT(1)->getLine());
 			}
 			ctor_definition
-		|
+		|!
 			// Templated operator function
 			{if (statementTrace>=1) 
 				printf("%d member_declaration Templated operator function\n",LT(1)->getLine());
 			}
-			conversion_function_decl_or_def
+			(mt:"inline")? fct:conversion_function_decl_or_def
+			{
+			 #fct = #(#[MYFUNCTION, "convertor"], #fct);
+	 		 if(#mt != nullAST)
+				#fct->addChild(RefPNode(#(#[MYFUNCTION, "specifier"], #mt)));
+			 astFactory->addASTChild(currentAST, ANTLR_USE_NAMESPACE(antlr)RefAST(#fct));
+			}
 		|
 			// Templated class definition
 			{if (statementTrace>=1) 
@@ -979,18 +999,29 @@ declaration_specifiers
 	_fs = fsInvalid;	// For FunctionSpecifier	// inline,virtual,explicit
 
 	}
-	(	(options {warnWhenFollowAmbig = false;}
-		:	"typedef"!	{td=true;}			
-		|	"friend"	{fd=true;}
-		|	sc = storage_class_specifier	// auto,register,static,extern,mutable
-		|	tq = type_qualifier		// const,volatile	// aka cv_qualifier See type_qualifier
-		|	fs = function_specifier	// inline,virtual,explicit
-		|	("_declspec"|"__declspec") LPAREN ID RPAREN 
-		)*
+	(	
+		specifier_prefix[td, fd, sc,tq,fs]
 		ts = type_specifier
 		(tq = type_qualifier)*		// const,volatile	// aka cv_qualifier See type_qualifier
 	)
 	{declarationSpecifier(td,fd,sc,tq,ts,fs);}
+	;
+
+//specifier_prefix
+specifier_prefix [bool& td, bool& fd, StorageClass& sc, TypeQualifier& tq, FunctionSpecifier& fs]
+	:
+		(options {warnWhenFollowAmbig = false;}
+		:	"typedef"!	{td=true;}			
+		|	"friend"!	{fd=true;}
+		|	sc = storage_class_specifier	// auto,register,static,extern,mutable
+		|	tq = type_qualifier		// const,volatile	// aka cv_qualifier See type_qualifier
+		|	fs = function_specifier	// inline,virtual,explicit
+		|	("_declspec"!|"__declspec"!) LPAREN! ID RPAREN! 
+		)*
+		{
+		 if(#specifier_prefix != nullAST)
+			#specifier_prefix = #(#[MYDECLAR, "specifier"], #specifier_prefix);
+		}
 	;
 
 //storage_class_specifier
@@ -1102,6 +1133,16 @@ type_qualifier returns [CPPParser::TypeQualifier tq = tqInvalid] // aka cv_quali
 		)
 	;
 
+//class_prefix
+class_prefix
+	:
+	(("_declspec"!|"__declspec"!) LPAREN! expression RPAREN!)*
+	{
+	 if(#class_prefix != nullAST)
+		#class_prefix = #(#[MYDECLAR, "specifier"], #class_prefix);
+	}
+	;
+	
 //class_decl_or_def
 class_decl_or_def [FunctionSpecifier fs] 
 	{char *saveClass; 
@@ -1115,7 +1156,7 @@ class_decl_or_def [FunctionSpecifier fs]
 		|"struct"!	{ts = tsSTRUCT;typeName="class";}
 		|"union"!	{ts = tsUNION;typeName="union";}
 		)
-		(("_declspec"|"__declspec") LPAREN expression RPAREN)*	// Temp for Evgeniy
+		class_prefix	// Temp for Evgeniy
 		(	id = qualified_id
 			{strcpy(qid,id.c_str());}
 			(options{generateAmbigWarnings = false;}:
@@ -1227,7 +1268,7 @@ qualified_id returns [data qid]
 			((LESSTHAN template_argument_list GREATERTHAN)=>
 			  LESSTHAN template_argument_list GREATERTHAN)? // {strcat(qitem02,"<...>");}
 		|  
-			OPERATOR op=optor
+			OPERATOR! op=optor
 			{strcat(qitem02,"operator"); strcat(qitem02,op.c_str());}
 		|
 			TILDE id_expression		// 1/08/07
@@ -1371,14 +1412,21 @@ declarator_suffix		// Note: Only used above in direct_declarator
 conversion_function_decl_or_def
 	{CPPParser::TypeQualifier tq;}
 	:	
-		OPERATOR declaration_specifiers (STAR | AMPERSAND)?	// DW 01/08/03 Use type_specifier here? see syntax
-		(LESSTHAN template_parameter_list GREATERTHAN)?
-		LPAREN (parameter_list)? RPAREN	
+		OPERATOR! declaration_specifiers conversion_type_modifier 
+		(LESSTHAN! template_parameter_list GREATERTHAN!)?
+		LPAREN! (parameter_list)? RPAREN!	
 		(tq = type_qualifier)*	// DW 29/07/05 ? changed to *
 		(exception_specification)?
 		(	compound_statement
-		|	SEMICOLON {end_of_stmt();}
+		|	SEMICOLON! {end_of_stmt();}
 		)
+	;
+
+//conversion_type_modifier
+conversion_type_modifier
+	:
+	(STAR | AMPERSAND)?	// DW 01/08/03 Use type_specifier here? see syntax
+	{#conversion_type_modifier = #(#[MYDECLAR, "modifier"], #conversion_type_modifier);}
 	;
 
 //function_declaration
@@ -1402,27 +1450,6 @@ function_declarator [int definition]
 		(ptr_operator)=> ptr_operator function_declarator[definition]
 	|	
 		function_direct_declarator[definition]
-	;
-
-//function_inline_declarator
-function_inline_declarator
-	{
-	data id;
-	CPPParser::TypeQualifier tq;
-	}
-	:
-		id = qualified_id
-		{if (_td==true)       // This statement is a typedef   
-			declaratorID(id.c_str(),qiType);
-		 else
-			declaratorID(id.c_str(),qiFun);
-		}
-		LPAREN! {declaratorParameterList(0);}
-		(parameter_list)?
-		RPAREN! {declaratorEndParameterList(0);}
-		(tq = type_qualifier)*
-		(exception_specification)?
-		{#function_inline_declarator = #(#[MYFUNCTION, "function"], #function_inline_declarator);}
 	;
 
 //function_direct_declarator
@@ -1471,6 +1498,27 @@ function_direct_declarator [int definition]
 		(ASSIGNEQUAL! OCTALINT!{astFactory->addASTChild(currentAST,#[MYFUNCTION, "pure"]);})?	// The value of the octal must be 0, pure virtual function
 		{functionEndParameterList(definition);}
 		(exception_specification)? 
+	;
+
+//function_inline_declarator
+function_inline_declarator
+	{
+	data id;
+	CPPParser::TypeQualifier tq;
+	}
+	:
+		id = qualified_id
+		{if (_td==true)       // This statement is a typedef   
+			declaratorID(id.c_str(),qiType);
+		 else
+			declaratorID(id.c_str(),qiFun);
+		}
+		LPAREN! {declaratorParameterList(0);}
+		(parameter_list)?
+		RPAREN! {declaratorEndParameterList(0);}
+		(tq = type_qualifier)*
+		(exception_specification)?
+		{#function_inline_declarator = #(#[MYFUNCTION, "function"], #function_inline_declarator);}
 	;
 
 //dtor_definition
@@ -1630,9 +1678,13 @@ parameter_declaration
 	;
 
 //type_id
-type_id
+type_id!
 	:
-		declaration_specifiers abstract_declarator
+		s:declaration_specifiers{#s=returnAST;} a:abstract_declarator{#a=returnAST;}
+		{
+		 #s->addChild(RefPNode(#a));
+		 #type_id = #s;
+		}
 	;
 
 /* This rule looks a bit weird because (...) can happen in two
@@ -2491,18 +2543,19 @@ optor returns [data s]
 			(options {warnWhenFollowAmbig = false;}:
 				LSQUARE RSQUARE  {strcat(sitem,"[]");} )?
 		|	
-			LPAREN RPAREN  {strcat(sitem,"()");}
+			LPAREN RPAREN!  {strcat(sitem,"()");}
 		|	
-			LSQUARE RSQUARE  {strcat(sitem,"[]");}
+			LSQUARE RSQUARE!  {strcat(sitem,"[]");}
 		|
 			{strcat(sitem,(LT(1)->getText()).data());}
 			optor_simple_tokclass
 		|
 			{strcat(sitem,"type-specifier()");}
-			ts = type_specifier LPAREN RPAREN
+			ts = type_specifier LPAREN RPAREN!
 		)
 		{
 		s = sitem;
+		#optor = #(#[MYFUNCTION, "operator"], #optor);
 		}
 	;
 
