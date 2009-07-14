@@ -1272,6 +1272,8 @@ qualified_id returns [data qid]
 			{strcat(qitem02,"operator"); strcat(qitem02,op.c_str());}
 		|
 			TILDE id_expression		// 1/08/07
+		|
+			"typeid" {strcat(qitem02, "typeid");}	//Add typeid here to treat typeid as a function, Wilson Chen,14/7/09, See also postfix_expression
 		)
 		{
 		qid = qitem02;
@@ -1299,11 +1301,11 @@ member_declarator!
 	|  
 		d:declarator{#d=returnAST;}
 		(
-			(ASSIGNEQUAL OCTALINT)=>ASSIGNEQUAL OCTALINT	// The value must be zero (for pure virtual)
-			{#d->addChild(RefPNode(#[MYFUNCTION, "pure"]));}
+			(ASSIGNEQUAL OCTALINT)=>ASSIGNEQUAL i:OCTALINT	// The value must be zero (for pure virtual)
+			{#i=#(#[MYEXPRESSION,"assign"], #i);}
 		|	
 			ASSIGNEQUAL 
-			i:initializer{#i=#(#[MYEXPRESSION,"assign"], returnAST);}
+			initializer{#i=#(#[MYEXPRESSION,"assign"], returnAST);}
 		|	
 			LPAREN expression_list RPAREN{#i=#(#[MYEXPRESSION, "ctor"], returnAST);}
 		)?
@@ -1337,6 +1339,7 @@ declarator
 direct_declarator
 	{
 	data id;
+	int nType = 0;
 	}
 	:	
 		(qualified_id LPAREN (RPAREN|declaration_specifiers) )=>	// Must be function declaration
@@ -1381,22 +1384,29 @@ direct_declarator
 			declaratorID(id.c_str(),qiVar);
 		 is_address = false; is_pointer = false;
 		}
-	|	
-		LPAREN! declarator RPAREN! 
+	|!	
+		LPAREN! d:declarator RPAREN! 
 		(options {warnWhenFollowAmbig = false;}:
-		 declarator_suffix)? // DW 1/9/04 declarator_suffix made optional as failed on line 2956 in metrics.i
+		 nType=s:declarator_suffix)? // DW 1/9/04 declarator_suffix made optional as failed on line 2956 in metrics.i
 							 // According to the grammar a declarator_suffix is not required here
-		{#direct_declarator = #(#[MYFUNCTION, "function"], #direct_declarator);}
+		{
+		 if(nType == 1)
+			#direct_declarator = #(#d, #s);
+		 else if(nType == 2)
+			#direct_declarator = #(#[MYFUNCTION, "function"], #d, #s);
+		 else
+			#direct_declarator = #d;
+		}
 	;
 
 //declarator_suffix
-declarator_suffix		// Note: Only used above in direct_declarator
+declarator_suffix returns [int nType = 0]		// Note: Only used above in direct_declarator
 	{CPPParser::TypeQualifier tq;}  
 	:
 	(	
 		//(options {warnWhenFollowAmbig = false;}:
 		(LSQUARE! (constant_expression)? RSQUARE!)+
-		{declaratorArray();}
+		{declaratorArray();nType=1;}
 		{#declarator_suffix=#(#[MYDECLAR, "array"], #declarator_suffix);}
 	|	
 		{(!((LA(1)==LPAREN)&&(LA(2)==ID))||(qualifiedItemIsOneOf(qiType|qiCtor,1)))}?
@@ -1405,6 +1415,7 @@ declarator_suffix		// Note: Only used above in direct_declarator
 		RPAREN! {declaratorEndParameterList(0);}
 		(tq = type_qualifier)*
 		(exception_specification)?
+		{nType = 2;}
 	)
 	;
 
@@ -1894,12 +1905,12 @@ statement
 		|	labeled_statement
 		|	case_statement
 		|	default_statement
-		|	expression SEMICOLON {end_of_stmt();}
+		|	expression SEMICOLON! {end_of_stmt();}
 		|	compound_statement
 		|	selection_statement
 		|	iteration_statement
 		|	jump_statement
-		|	SEMICOLON {end_of_stmt();}
+		|	SEMICOLON! {end_of_stmt();}
 		|	try_block
 		|	throw_statement
 			// The next two entries may be used for debugging
@@ -2013,19 +2024,21 @@ condition
 //jump_statement
 jump_statement
 	:	
-		(	"goto" ID SEMICOLON {end_of_stmt();}
-		|	"continue" SEMICOLON {end_of_stmt();}
-		|	"break" SEMICOLON {end_of_stmt();}
+		(	"goto" ID SEMICOLON! {end_of_stmt();}
+		|	"continue" SEMICOLON! {end_of_stmt();}
+		|	"break" SEMICOLON! {end_of_stmt();}
 		|	// DW 16/05/03 May be problem here if return is followed by a cast expression 
 			"return" {in_return = true;}
 			(	options{warnWhenFollowAmbig = false;}:
 				(LPAREN {(qualifiedItemIsOneOf(qiType) )}? ID RPAREN)=> 
-				LPAREN ID RPAREN (expression)?	// This is an unsatisfactory fix for problem in xstring re "return (allocator);"
+				LPAREN! ID RPAREN! (expression)?	// This is an unsatisfactory fix for problem in xstring re "return (allocator);"
 												//  and in xlocale re return (_E)(_Tolower((unsigned char)_C, &_Ctype));
+												//	still can't go to here!
 				//{printf("%d CPP_parser.g jump_statement Return fix used\n",lineNo);}
 			|	expression 
-			)?	SEMICOLON {in_return = false,end_of_stmt();} 
+			)?	SEMICOLON! {in_return = false,end_of_stmt();} 
 		)
+		{#jump_statement = #(#[MYSTATEMENT, "jump"], #jump_statement);}
 	;
 
 //try_block
@@ -2086,7 +2099,7 @@ expression
 	lineNo = LT(1)->getLine();
 	}
 	:	
-		assignment_expression (COMMA assignment_expression)*
+		assignment_expression (COMMA! assignment_expression)*
 	;
 
 // right-to-left for assignment op
@@ -2142,37 +2155,37 @@ constant_expression
 //logical_or_expression
 logical_or_expression
 	:	
-		logical_and_expression (OR logical_and_expression)* 
+		logical_and_expression (OR^ logical_and_expression)* 
 	;
 
 //logical_and_expression
 logical_and_expression
 	:	
-		inclusive_or_expression (AND inclusive_or_expression)* 
+		inclusive_or_expression (AND^ inclusive_or_expression)* 
 	;
 
 //inclusive_or_expression
 inclusive_or_expression
 	:	
-		exclusive_or_expression (BITWISEOR exclusive_or_expression)*
+		exclusive_or_expression (BITWISEOR^ exclusive_or_expression)*
 	;
 
 //exclusive_or_expression
 exclusive_or_expression
 	:	
-		and_expression (BITWISEXOR and_expression)*
+		and_expression (BITWISEXOR^ and_expression)*
 	;
 
 //and_expression
 and_expression
 	:	
-		equality_expression (AMPERSAND equality_expression)*
+		equality_expression (AMPERSAND^ equality_expression)*
 	;
 
 //equality_expression
 equality_expression
 	:	
-		relational_expression ( (NOTEQUAL|EQUAL) relational_expression)*
+		relational_expression ( (NOTEQUAL^|EQUAL^) relational_expression)*
 	;
 
 //relational_expression
@@ -2180,10 +2193,10 @@ relational_expression
 	:	
 		shift_expression
 		(options {warnWhenFollowAmbig = false;}:
-			(	LESSTHAN
-			|	GREATERTHAN
-			|	LESSTHANOREQUALTO
-			|	GREATERTHANOREQUALTO
+			(	LESSTHAN^
+			|	GREATERTHAN^
+			|	LESSTHANOREQUALTO^
+			|	GREATERTHANOREQUALTO^
 			)
 		 shift_expression
 		)*
@@ -2192,7 +2205,7 @@ relational_expression
 //shift_expression
 shift_expression
 	:	
-		additive_expression ((SHIFTLEFT | SHIFTRIGHT) additive_expression)*
+		additive_expression ((SHIFTLEFT^ | SHIFTRIGHT^) additive_expression)*
 	;
 
 // See comment for multiplicative_expression regarding #pragma
@@ -2264,13 +2277,16 @@ pm_expression
 cast_expression 
 	:
 		(LPAREN type_id RPAREN unary_expression)=>
-		 LPAREN type_id RPAREN unary_expression
+		 LPAREN! type_id RPAREN! unary_expression
+		{#cast_expression = #(#[MYEXPRESSION, "cast"], #cast_expression);}	
 	|
 		// Believe it or not, you can get more than one cast expression in sequence
 		(LPAREN type_id RPAREN cast_expression)=>
-		 LPAREN type_id RPAREN cast_expression
+		 LPAREN! type_id RPAREN! cast_expression
+		{#cast_expression = #(#[MYEXPRESSION, "cast"], #cast_expression);}	
 	|  
 		unary_expression	// handles outer (...) of "(T(expr))"
+	
 	;
 
 //unary_expression
@@ -2280,19 +2296,19 @@ unary_expression
 			(postfix_expression)=> 
 			postfix_expression
 		|	
-			PLUSPLUS unary_expression
+			PLUSPLUS^ unary_expression
 		|	
-			MINUSMINUS unary_expression
+			MINUSMINUS^ unary_expression
 		|	
 			unary_operator cast_expression
 		|	
-			("sizeof"
-			|"__alignof__" 	//Zhaojz 02/02/05 to fix bug 29 (GNU)
+			("sizeof"^
+			|"__alignof__"^ 	//Zhaojz 02/02/05 to fix bug 29 (GNU)
 			)
 			(	(unary_expression)=>
 				 unary_expression
 			|
-				LPAREN type_id RPAREN
+				LPAREN! type_id RPAREN!
 			)
 		|   
 			(SCOPE)?
@@ -2319,34 +2335,60 @@ postfix_expression
 		(ts = simple_type_specifier LPAREN)=>
 		 ts = simple_type_specifier LPAREN (expression_list)? RPAREN
 		// Following put in to allow for the above being a constructor as shown in test_constructors_destructors.cpp
-		(DOT postfix_expression)?
-	|  
-		primary_expression
+		// Fix, maybe a pointer converter then call its function
+		(dot_expression postfix_expression)?
+	|!  
+		p:primary_expression
 		(options {warnWhenFollowAmbig = false;}:
-        	LSQUARE expression RSQUARE
+        	array:(LSQUARE expression RSQUARE) 
+        	{
+        	 if(#array == nullAST)
+        		#array = #[MYEXPRESSION, "array"];
+        	 #array->addChild(returnAST);
+        	}
 		|	
-			LPAREN (expression_list)? RPAREN 
-		|	(DOT|POINTERTO) ("template")? id_expression
-		|	PLUSPLUS 
-		|	MINUSMINUS
+			LPAREN (el:expression_list)? RPAREN 
+			{#p = #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION, "function"],#p), #(#[MYEXPRESSION, "parameters"], #el));}
+		|	ob:dot_expression (t:"template")? id:id_expression
+			{ #p = #(id, #(ob, p), t);	}
+		|	PLUSPLUS {#p->addChild(RefPNode(#[MYEXPRESSION, "++"]));}
+		|	MINUSMINUS {#p->addChild(RefPNode(#[MYEXPRESSION, "--"]));}
 		)*
+		{ 
+		 if(#array != nullAST)
+			#p->addChild(#array);
+		 #postfix_expression = #p;
+		}
 	|
-		("dynamic_cast"|"static_cast"|"reinterpret_cast"|"const_cast")
-		LESSTHAN ("const")? ts = type_specifier (ptr_operator)? GREATERTHAN
-		LPAREN expression RPAREN
-	|
-		"typeid" 
-		LPAREN ((type_id)=>type_id|expression) RPAREN
-		( (DOT|POINTERTO) postfix_expression)?
+		("dynamic_cast"^|"static_cast"^|"reinterpret_cast"^|"const_cast"^)
+		ts = cast_type
+		LPAREN! expression RPAREN!
+//	|
+//		"typeid" 
+//		LPAREN ((type_id)=>type_id|expression) RPAREN
+//		(dot_expression postfix_expression)?					//treat typeid as a function call, add it into qualified_id, 
 	)
 	;
 
+//cast_type
+cast_type returns [CPPParser::TypeSpecifier ts]
+	:
+	LESSTHAN! ("const")? ts = type_specifier (ptr_operator)? GREATERTHAN!
+	{#cast_type=#(#[MYEXPRESSION, "casttype"], #cast_type);}
+	;
+	
+//dot_expression
+dot_expression
+	:
+	(DOT|POINTERTO)
+	;
+	
 //primary_expression
 primary_expression
 	:	id_expression
 	|	literal
 	|	"this"
-	|	LPAREN expression RPAREN
+	|	LPAREN! expression RPAREN!
 	;
 
 //id_expression
