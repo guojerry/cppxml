@@ -2319,9 +2319,10 @@ unary_expression
 	;
 
 //postfix_expression
-postfix_expression
+postfix_expression [RefPNode recur = RefPNode(nullAST)]
 	{
 	 TypeSpecifier ts;
+	 bool bDot;
 	}
 	:
 	(	
@@ -2330,15 +2331,23 @@ postfix_expression
 		{!(LA(1)==LPAREN)}?
 		(ts = simple_type_specifier LPAREN RPAREN LPAREN)=>	// DW 01/08/03 To cope with problem in xtree (see test10.i)
 		 ts = simple_type_specifier LPAREN RPAREN LPAREN (expression_list)? RPAREN
-	|
+	|!
 		{!(LA(1)==LPAREN)}?
 		(ts = simple_type_specifier LPAREN)=>
-		 ts = simple_type_specifier LPAREN (expression_list)? RPAREN
+		 ts = tss:simple_type_specifier LPAREN (tel:expression_list)? RPAREN
 		// Following put in to allow for the above being a constructor as shown in test_constructors_destructors.cpp
-		// Fix, maybe a pointer converter then call its function
-		(dot_expression postfix_expression)?
+		// Fix, maybe a pointer converter then call its function; and code to let it recursive, it is now hard to read. 14/7/2009
+		(bDot=tdot:dot_expression 
+			{
+			if(bDot==false)
+				#tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"convertor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
+			else
+				#tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"ctor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
+			}
+		ps:postfix_expression[#tss])?
+		{#postfix_expression=#ps;}
 	|!  
-		p:primary_expression
+		p:primary_expression {if(recur != nullAST) #p->addChild(recur);}
 		(options {warnWhenFollowAmbig = false;}:
         	array:(LSQUARE expression RSQUARE) 
         	{
@@ -2378,9 +2387,9 @@ cast_type returns [CPPParser::TypeSpecifier ts]
 	;
 	
 //dot_expression
-dot_expression
+dot_expression returns [bool bDot = false]
 	:
-	(DOT|POINTERTO)
+	(DOT{bDot=true;}|POINTERTO{bDot=false;})
 	;
 	
 //primary_expression
