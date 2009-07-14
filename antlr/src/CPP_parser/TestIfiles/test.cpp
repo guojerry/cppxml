@@ -3,10 +3,10 @@
 namespace test_case
 {
 /*
-
 char s3[256] = {0};
 char s4[2][120];
 
+extern int e_int = 0;
 int k, l = 3, m;
 static int i;
 int j = 3;
@@ -17,13 +17,18 @@ char* pData = (char*)new char[12];
 char* s1 = "my name";
 char s2[] = "my name";
 int& m = n;
-
+*/
 class data
 {
 public:
 	data(const char*, int) {}
 	~data() {}
 
+public:
+	bool doFoo(const char* input)
+	{
+		return true;
+	}
 protected:
 	void MyFunc();
 
@@ -46,8 +51,6 @@ void data::data_1::MyFunc_1()
 {
 
 }
-
-*/
 /*
 namespace test_case_template_1
 {
@@ -105,8 +108,7 @@ namespace test_case_template_2
 		return R(a1, a2);
 	}
 }
-*/
-/*
+
 template<typename T, class S>
 class MyTemplate
 {
@@ -128,10 +130,10 @@ namespace test_case_declaration_1
 	}
 
 	void setname(const char* sname);
-	bool (isdigit)();
+	bool fourth, (isdigit)(const char* ch);
 	
 	int first, getname(int id);
-	int (digits)[1][1];
+	int (fifth),(digits)[1][1];
 
 	class TestDeclaration
 	{
@@ -145,7 +147,6 @@ namespace test_case_declaration_1
 		}
 	};
 }
-
 
 namespace test_case_interface_1
 {
@@ -268,7 +269,7 @@ namespace test_case_enum_union
 		} S_un;
 	}INADDR;
 }
-*/
+
 namespace test_case_template_memberfunctor_declartor
 {
 	typedef int HRESULT;
@@ -363,7 +364,6 @@ namespace test_case_template_memberfunctor_declartor
 	};
 }
 
-/*
 namespace test_case_declaration_2
 {
 	class MyConvertion
@@ -396,18 +396,146 @@ namespace test_case_declaration_2
 	
 }
 */
+
+namespace test_case_basic_statement
+{
+	template<class _Alloc>
+	class myTest
+	{
+	public:
+		_Alloc* getAlloc()
+		{
+			return alloc;
+		}
+		static void Sleep(int seconds)
+		{
+		}
+		
+		_Alloc* alloc;
+	};
+
+	int stricmp(register const char *s1, register const char *s2)
+	{
+		while (*s1 == *s2++)
+		{
+			if (*s1++ == 0)
+				return (0);
+			else
+				continue;
+		}
+		return (*(const unsigned char *)s1 - *(const unsigned char *)(s2 - 1));
+	}
+
+	int main(int argc, char** argv)
+	{
+/*		int nResult = 0;
+		int nInput = 3;
+		nResult = 10 + (nInput++ - nResult++);
+
+		++nResult;
+		nInput++;
+		data aData(0, 1);
+		bool bEmpty = false;
+
+		bEmpty = aData.doFoo("sd");
+
+		int myarray[10][5];
+		myarray[0][3] = 0;
+
+		stricmp("myname", "myage");
+
+		myTest<data>* pTest;
+		pTest->getAlloc()->doFoo("baby");
+		myTest<data>::Sleep(0);
+
+*/		data* pData;
+//		const data* pRaw = dynamic_cast<const data*>(pData);
+
+		typedef data *LPDATA;
+
+//		typeid(pTest->getAlloc()).name();
+//		typeid(pData).name();
+
+//		pRaw = LPDATA(pData);
+		LPDATA((void*)pData)->doFoo("wife");
+		data("myname", 0).doFoo("myname");
+
+		return (int)(char)('a' + 'b');
+	}
+}
+
 //-class ctor initialize, base class, template
 //-class function with scope.
 //-class static declaration.
 //-namespace
 //-function parameter initialize, Function Pointer, typedef,...
 //-friend,extern,enum, union
-//class member function 
+//-class member function pointer, operator reload, operator convertor
 //Statements: assign, if then, do while, for, return, continue, break,
 //Expression: condition expression, arithmetic expression, ++/--/+=/-=/...
 //go to, label
 //throw, catch
-//cout <<, operator reload
+//cout <<, 
 //Replace import node with special classes.
 //XML exports
+
+/*
+namespace test_case_typeid_2
+{
+#include <iostream>
+	using namespace std;
+	int main( void )
+	{
+		// sample 1
+		cout << typeid(1.1f).name() << endl;
+		// sample 2
+		class Base1
+		{
+		};
+		class Derive1 : public Base1
+		{
+		};
+		Derive1 d1;
+		Base1& b1 = d1;
+		cout << typeid(b1).name() << endl; // 输出"class Base1",因为Derive1和Base1之间没有多态性
+		// sample 3, 编译时需要加参数 /GR
+		class Base2
+		{
+			virtual void fun( void ) {}
+		};
+		class Derive2 : public Base2
+		{
+		};
+		Derive2 d2;
+		Base2& b2 = d2;
+		cout << typeid(b2).name() << endl; // 输出"class Derive2",因为Derive1和Base1之间有了多态性
+		// sample 4
+		class Derive22 : public Base2
+		{
+		};
+		// 指针强制转化失败后可以比较指针是否为零，而引用却没办法，所以引用制转化失败后抛出异常
+		Derive2* pb1 = dynamic_cast<Derive2*>(&b2);
+		cout << boolalpha << (0!=pb1) << endl; // 输出"true",因为b2本身就确实是Derive2
+		Derive22* pb2 = dynamic_cast<Derive22*>(&b2);
+		cout << boolalpha << (0!=pb2) << endl; // 输出"true",因为b2本身不是Derive2
+
+		try {
+			Derive2& rb1 = dynamic_cast<Derive2&>(b2);
+			cout << "true" << endl;
+		} catch( bad_cast )
+		{
+			cout << "false" << endl;
+		}
+		try {
+			Derive22& rb2 = dynamic_cast<Derive22&>(b2);
+			cout << "true" << endl;
+		} catch( ... ) // 应该是 bad_cast,但不知道为什么在VC++6.0中却不行
+		{
+			cout << "false" << endl;
+		}
+
+		return 0;
+	}
+}
+*/
 }
