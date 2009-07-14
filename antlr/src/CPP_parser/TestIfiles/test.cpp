@@ -29,14 +29,14 @@ public:
 	{
 		return true;
 	}
-protected:
+public:
 	void MyFunc();
 
 	class data_1
 	{
 	public:
 		void MyFunc_1();
-	};
+	}m_data1;
 private:
 	//test member_declarator case 1
 	unsigned char s1:3;
@@ -444,20 +444,20 @@ namespace test_case_basic_statement
 
 		stricmp("myname", "myage");
 
-		myTest<data>* pTest;
-		pTest->getAlloc()->doFoo("baby");
+*/		myTest<data>* pTest = 0;
+		pTest->getAlloc()->m_data1.MyFunc_1();
 		myTest<data>::Sleep(0);
 
-*/		data* pData;
+		data* pData = 0;
 //		const data* pRaw = dynamic_cast<const data*>(pData);
 
-		typedef data *LPDATA;
+		typedef myTest<data> *LPDATA;
 
 //		typeid(pTest->getAlloc()).name();
 //		typeid(pData).name();
 
 //		pRaw = LPDATA(pData);
-		LPDATA((void*)pData)->doFoo("wife");
+		LPDATA((void*)pData)->getAlloc()->doFoo("wife");
 		data("myname", 0).doFoo("myname");
 
 		return (int)(char)('a' + 'b');
