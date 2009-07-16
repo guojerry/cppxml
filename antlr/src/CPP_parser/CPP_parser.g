@@ -2062,19 +2062,24 @@ jump_statement
 		{#jump_statement = #(#[MYSTATEMENT, "jump"], #jump_statement);}
 	;
 
+//Add to support MSVC SEH exception. Wilson Chen, 16/7/2009
 //ep_try_block
 ep_try_block
 	:
-		"__try"^ compound_statement (ep_handler)*
+		"__try"^ compound_statement (ep_exception)? (ep_finally)?
 	;
 
-//EP_handler
-ep_handler
+//ep_exception
+ep_exception!
 	:	
-		"__except"^
-		{exceptionBeginHandler();}
-		compound_statement
-		{exceptionEndHandler();}
+		"__except" LPAREN e:expression RPAREN s:compound_statement
+		{#ep_exception = #(#[MYEXPRESSION, "__except"], #(#[MYEXPRESSION, "condition"], e), s);}
+	;
+	
+//ep_finally
+ep_finally
+	:
+		"__finally" compound_statement
 	;
 	
 //try_block
@@ -2116,11 +2121,11 @@ throw_statement
 using_statement
 	{data qid;}
 	:		
-		"using"
+		"using"^
 		("namespace" qid = qualified_id		// Using-directive
 		|("typename")? qid = qualified_id	// Using-declaration
 		)
-		SEMICOLON {end_of_stmt();}
+		SEMICOLON! {end_of_stmt();}
 	;
 
 ///////////////////////////////////////////////////////////////////////
@@ -2177,10 +2182,19 @@ remainder_expression
 	;
 
 //conditional_expression
-conditional_expression
+conditional_expression!
+	{
+		bool bQuestion = false;
+	}
 	:	
-		logical_or_expression
-		(QUESTIONMARK expression COLON conditional_expression)?
+		l:logical_or_expression
+		(QUESTIONMARK e:expression COLON v:conditional_expression {bQuestion = true;})?
+		{
+			if(bQuestion==true)
+				#conditional_expression = #(#[MYEXPRESSION, "ifexp"], #(#[MYEXPRESSION, "condition"],l), #(#[MYEXPRESSION, "left"], e), #(#[MYEXPRESSION, "right"], v));
+			else
+				#conditional_expression = #l;
+		}
 	;
 
 //constant_expression

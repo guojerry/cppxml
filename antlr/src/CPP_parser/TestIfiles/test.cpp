@@ -477,7 +477,7 @@ namespace test_case_basic_statement
 		return (int)(char)('a' + 'b');
 	}
 }
-*/
+
 
 namespace test_case_control_1
 {
@@ -515,8 +515,9 @@ namespace test_case_control_1
 		{
 			Loop();
 		}
-		__except(0) 
+		__except(i=1,0) 
 		{
+			i = 0;
 		}
 	}
 
@@ -566,6 +567,45 @@ End:
 	}
 }
 
+
+namespace test_case_try_exception
+{
+	void puts(const char*)
+	{
+	}
+	void main()
+	{	
+		int* p = 0;
+		puts("SEH begin");
+		__try
+		{
+			__try
+			{
+				puts("in try");
+				__try
+				{
+					puts("in try");
+					*p = 0;
+				}
+				__finally
+				{
+					puts("in finally");
+				}
+			}
+			__except(puts("in filter"), 0)
+			{
+				puts("in except");
+			}
+		}
+		__except(puts("in filter"), 1)
+		{
+			puts("in except");
+		}
+		puts("SEH end");
+	}
+}
+*/
+
 //-class ctor initialize, base class, template
 //-class function with scope.
 //-class static declaration.
@@ -576,20 +616,35 @@ End:
 //-Statements: assign, if then, do while, for, return, continue, break,
 //-Expression: condition expression, arithmetic expression, ++/--/+=/-=/...
 //-go to, label
-//throw, catch
-//cout <<, 
+//-throw, catch, __try, __except
+//-cout <<, 
 //Replace import node with special classes.
 //XML exports
 
-/*
 namespace test_case_typeid_2
 {
-#include <iostream>
-	using namespace std;
+	static const char* endl = "\r\n";
+	class ostream
+	{
+	public:
+		ostream& operator<<(const char* s)
+		{
+			return *this;
+		}
+
+		ostream& operator<<(bool b)
+		{
+			return *this;
+		}
+	};
+	ostream cout;
+
+	using namespace test_case_typeid_2;
 	int main( void )
 	{
+		int y = 1 ? 0 : 10;
 		// sample 1
-		cout << typeid(1.1f).name() << endl;
+//		cout << typeid(1.1f).name() << endl;
 		// sample 2
 		class Base1
 		{
@@ -599,7 +654,7 @@ namespace test_case_typeid_2
 		};
 		Derive1 d1;
 		Base1& b1 = d1;
-		cout << typeid(b1).name() << endl; // 输出"class Base1",因为Derive1和Base1之间没有多态性
+//		cout << typeid(b1).name() << endl; // 输出"class Base1",因为Derive1和Base1之间没有多态性
 		// sample 3, 编译时需要加参数 /GR
 		class Base2
 		{
@@ -610,21 +665,21 @@ namespace test_case_typeid_2
 		};
 		Derive2 d2;
 		Base2& b2 = d2;
-		cout << typeid(b2).name() << endl; // 输出"class Derive2",因为Derive1和Base1之间有了多态性
+//		cout << typeid(b2).name() << endl; // 输出"class Derive2",因为Derive1和Base1之间有了多态性
 		// sample 4
 		class Derive22 : public Base2
 		{
 		};
 		// 指针强制转化失败后可以比较指针是否为零，而引用却没办法，所以引用制转化失败后抛出异常
 		Derive2* pb1 = dynamic_cast<Derive2*>(&b2);
-		cout << boolalpha << (0!=pb1) << endl; // 输出"true",因为b2本身就确实是Derive2
+		cout << (0!=pb1) << endl; // 输出"true",因为b2本身就确实是Derive2
 		Derive22* pb2 = dynamic_cast<Derive22*>(&b2);
-		cout << boolalpha << (0!=pb2) << endl; // 输出"true",因为b2本身不是Derive2
+		cout << (0!=pb2) << endl; // 输出"true",因为b2本身不是Derive2
 
 		try {
 			Derive2& rb1 = dynamic_cast<Derive2&>(b2);
 			cout << "true" << endl;
-		} catch( bad_cast )
+		} catch( ... )
 		{
 			cout << "false" << endl;
 		}
@@ -639,5 +694,5 @@ namespace test_case_typeid_2
 		return 0;
 	}
 }
-*/
+
 }
