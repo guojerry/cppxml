@@ -1329,8 +1329,9 @@ initializer
 //declarator
 declarator
 	:
-		(ptr_operator)=> ptr_operator	// AMPERSAND or STAR etc.
-		declarator
+	!	(ptr_operator)=> pt:ptr_operator	// AMPERSAND or STAR etc.
+		d:declarator
+		{#d->addChild(#pt); #declarator = #d;}
 	|	
 		direct_declarator
 	;
@@ -1391,7 +1392,10 @@ direct_declarator
 							 // According to the grammar a declarator_suffix is not required here
 		{
 		 if(nType == 1)
-			#direct_declarator = #(#d, #s);
+		 {
+			#d->addChild(#s);
+			#direct_declarator = #d;
+		 }
 		 else if(nType == 2)
 			#direct_declarator = #(#[MYFUNCTION, "function"], #d, #s);
 		 else
@@ -1693,8 +1697,8 @@ type_id!
 	:
 		s:declaration_specifiers{#s=returnAST;} a:abstract_declarator{#a=returnAST;}
 		{
-		 #s->addChild(RefPNode(#a));
-		 #type_id = #s;
+//		 #s->addChild(RefPNode(#a));
+		 #type_id = #(#[MYEXPRESSION, "typeid"],#s, #a);
 		}
 	;
 
@@ -1736,16 +1740,18 @@ abstract_declarator_suffix
 		(exception_specification)?
 	;
 
+//Fixed Wilson Chen, 16/7/2009, and the throw definition is not necessary anymore in C++
 //exception_specification
 exception_specification
-	{data so;}
+	{ TypeSpecifier ts;
+	}
 	:	
-		"throw" 
-		LPAREN 
-		(	(so = scope_override ID (COMMA so = scope_override ID)* )? 
+		"throw"^ 
+		LPAREN! 
+		(	(ts=simple_type_specifier (ptr_operator)? (COMMA! ts=simple_type_specifier (ptr_operator)?)* )? 
 		|	ELLIPSIS
 		)
-		RPAREN
+		RPAREN!
 	;
 
 //template_head
@@ -1900,6 +1906,10 @@ statement
 			block_declaration
 		|	(("typedef")? class_specifier (qualified_id)? LCURLY)=>
 			member_declaration
+		|	(declaration_specifiers LPAREN ptr_operator qualified_id RPAREN)=>
+			member_declaration
+		|	(declaration_specifiers (ptr_operator ptr_operator) qualified_id)=>
+			member_declaration
 		|	(declaration_specifiers ((ptr_operator)=>ptr_operator)? qualified_id)=>
 			member_declaration
 		|	labeled_statement
@@ -1912,6 +1922,7 @@ statement
 		|	jump_statement
 		|	SEMICOLON! {end_of_stmt();}
 		|	try_block
+		|	ep_try_block
 		|	throw_statement
 			// The next two entries may be used for debugging
 			// Use this statement in the source code to turn antlr trace on (See note above)
@@ -1935,21 +1946,26 @@ simple_declaration
 	;
 
 //labeled_statement
-labeled_statement
+labeled_statement!
 	:	
-		ID COLON statement
+		id:ID COLON s:statement
+		{#labeled_statement = #(#[MYSTATEMENT, "label"], id);
+		 #labeled_statement->setNextSibling(ANTLR_USE_NAMESPACE(antlr)RefAST(#s));
+		}
 	;
 
 //case_statement
-case_statement
+case_statement!
 	:	"case"
-		constant_expression COLON statement
+		ce:constant_expression COLON s:statement
+		{#case_statement = #(#[MYSTATEMENT, "case"], #(#[MYEXPRESSION,"value"],#ce), #(#[MYEXPRESSION,"body"], #s));}
 	;
 
 //default_statement
-default_statement
+default_statement!
 	:	
-		"default" COLON statement
+		"default" COLON s:statement
+		{#default_statement = #(#[MYSTATEMENT, "default"], #(#[MYEXPRESSION,"body"], #s));}
 	;
 
 //compound_statement
@@ -1971,45 +1987,49 @@ compound_statement
 //selection_statement
 selection_statement
 	:	
-		"if" LPAREN 
+	!	"if" LPAREN 
 		{enterNewLocalScope();}
-		condition RPAREN
-		statement
+		condition:condition RPAREN
+		left:statement
 		(options {warnWhenFollowAmbig = false;}:
-		 "else" statement)?
+		 "else" right:statement)?
 		{exitLocalScope();}
+		{#selection_statement = #(#[MYEXPRESSION, "if"], condition, #(#[MYEXPRESSION, "left"], left), #(#[MYEXPRESSION, "right"], right));}
 	|	
-		"switch" LPAREN
+		"switch"^ LPAREN!
 		{enterNewLocalScope();}
-		condition RPAREN statement
+		condition RPAREN! statement
 		{exitLocalScope();}
 	;
 
 //iteration_statement
-iteration_statement
+iteration_statement!
 	:	
 		"while"	LPAREN
 		{enterNewLocalScope();}
-		condition RPAREN 
-		statement  
+		c0:condition RPAREN 
+		s0:statement  
 		{exitLocalScope();}
+		{#iteration_statement = #(#[MYSTATEMENT, "while"], c0, #(#[MYSTATEMENT, "body"], s0));}
 	|	
-		"do" 
+		"do"
 		{enterNewLocalScope();}
-		statement "while"
-		LPAREN expression RPAREN 
+		s1:statement "while"
+		LPAREN e0:expression RPAREN
 		{exitLocalScope();}
 		SEMICOLON {end_of_stmt();} 
+		{#iteration_statement = #(#[MYSTATEMENT, "do"], #(#[MYSTATEMENT, "body"], s1), #(#[MYSTATEMENT, "while"], e0));}
 	|	
 		"for" LPAREN
 		{enterNewLocalScope();}
-		(	(declaration)=> declaration 
-		|	(expression)? SEMICOLON {end_of_stmt();}
+		(	(declaration)=> d:declaration 
+		|	(e1:expression)? SEMICOLON {end_of_stmt();}
 		)
-		(condition)? SEMICOLON {end_of_stmt();}
-		(expression)?
-		RPAREN statement	 
+		(c:condition)? SEMICOLON {end_of_stmt();}
+		(e2:expression)?
+		RPAREN s:statement	 
 		{exitLocalScope();}
+		{#iteration_statement = #(#[MYSTATEMENT, "for"], #(#[MYSTATEMENT, "init"], d, e1), c, #(#[MYSTATEMENT, "iterator"], e2), #(#[MYSTATEMENT, "body"], s));}
 	;
 
 //condition
@@ -2018,13 +2038,14 @@ condition
 		(	(declaration_specifiers declarator ASSIGNEQUAL)=> 
 			 declaration_specifiers declarator ASSIGNEQUAL remainder_expression
 		|	expression
+		{#condition = #(#[MYEXPRESSION, "condition"], #condition);}
 		)
 	;
 
 //jump_statement
 jump_statement
 	:	
-		(	"goto" ID SEMICOLON! {end_of_stmt();}
+		(	"goto"^ ID SEMICOLON! {end_of_stmt();}
 		|	"continue" SEMICOLON! {end_of_stmt();}
 		|	"break" SEMICOLON! {end_of_stmt();}
 		|	// DW 16/05/03 May be problem here if return is followed by a cast expression 
@@ -2041,19 +2062,34 @@ jump_statement
 		{#jump_statement = #(#[MYSTATEMENT, "jump"], #jump_statement);}
 	;
 
+//ep_try_block
+ep_try_block
+	:
+		"__try"^ compound_statement (ep_handler)*
+	;
+
+//EP_handler
+ep_handler
+	:	
+		"__except"^
+		{exceptionBeginHandler();}
+		compound_statement
+		{exceptionEndHandler();}
+	;
+	
 //try_block
 try_block
 	:	
-		"try" compound_statement (handler)*
+		"try"^ compound_statement (handler)*
 	;
 
 //handler
 handler
 	:	
-		"catch"
+		"catch"^
 		{exceptionBeginHandler();}
 		{declaratorParameterList(1);}
-		LPAREN exception_declaration RPAREN
+		LPAREN! exception_declaration RPAREN!
 		{declaratorEndParameterList(1);}
 		compound_statement
 		{exceptionEndHandler();}
@@ -2063,6 +2099,7 @@ handler
 exception_declaration
 	:	
 		parameter_declaration_list
+		{#exception_declaration = #(#[MYDECLAR, "exceptions"], #exception_declaration);}
 	;
 
 /* This is an expression of type void according to the ARM, which
@@ -2072,7 +2109,7 @@ exception_declaration
 //throw_statement
 throw_statement
 	:	
-		"throw" (assignment_expression) ? SEMICOLON { end_of_stmt();}
+		"throw"^ (assignment_expression)? SEMICOLON! { end_of_stmt();}
 	;
 
 //using_statement
@@ -2299,8 +2336,9 @@ unary_expression
 			PLUSPLUS^ unary_expression
 		|	
 			MINUSMINUS^ unary_expression
-		|	
-			unary_operator cast_expression
+		|!	
+			uo:unary_operator ce:cast_expression
+			{#unary_expression = #(#uo, #ce);}
 		|	
 			("sizeof"^
 			|"__alignof__"^ 	//Zhaojz 02/02/05 to fix bug 29 (GNU)
@@ -2335,13 +2373,15 @@ postfix_expression [RefPNode recur = RefPNode(nullAST)]
 		{!(LA(1)==LPAREN)}?
 		(ts = simple_type_specifier LPAREN)=>
 		 ts = tss:simple_type_specifier LPAREN (tel:expression_list)? RPAREN
+		{
+		 #tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"convertor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
+		 #ps = #tss;
+		}
 		// Following put in to allow for the above being a constructor as shown in test_constructors_destructors.cpp
 		// Fix, maybe a pointer converter then call its function; and code to let it recursive, it is now hard to read. 14/7/2009
 		(bDot=tdot:dot_expression 
 			{
-			if(bDot==false)
-				#tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"convertor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
-			else
+			if(bDot==true)
 				#tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"ctor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
 			}
 		ps:postfix_expression[#tss])?
@@ -2358,7 +2398,7 @@ postfix_expression [RefPNode recur = RefPNode(nullAST)]
 		|	
 			LPAREN (el:expression_list)? RPAREN 
 			{#p = #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION, "function"],#p), #(#[MYEXPRESSION, "parameters"], #el));}
-		|	ob:dot_expression (t:"template")? id:id_expression
+		|	bDot=ob:dot_expression (t:"template")? id:id_expression
 			{ #p = #(id, #(ob, p), t);	}
 		|	PLUSPLUS {#p->addChild(RefPNode(#[MYEXPRESSION, "++"]));}
 		|	MINUSMINUS {#p->addChild(RefPNode(#[MYEXPRESSION, "--"]));}
@@ -2446,7 +2486,7 @@ unary_operator
 new_expression
 	:
 	(  
-		"new"
+		"new"^
 		(	(LPAREN expression_list RPAREN)=> 
 			 LPAREN expression_list RPAREN)?
 		(new_type_id|LPAREN type_id RPAREN)
@@ -2458,7 +2498,8 @@ new_expression
 //new_initializer
 new_initializer
 	:	
-		LPAREN (expression_list)? RPAREN
+		LPAREN! (expression_list)? RPAREN!
+		{#new_initializer = #(#[MYEXPRESSION, "parameters"], #new_initializer);}
 	;
 
 //new_type_id
@@ -2493,8 +2534,9 @@ new_declarator
 direct_new_declarator
 	:
 		(options {warnWhenFollowAmbig = false;}:
-			LSQUARE expression RSQUARE
+			LSQUARE! expression RSQUARE!
 		)+
+	{#direct_new_declarator = #(#[MYSTATEMENT, "array"], #direct_new_declarator);}
 	;
 
 //ptr_operator
@@ -2567,7 +2609,7 @@ scope_override! returns [data so]
 //delete_expression
 delete_expression
 	:	
-		"delete" (LSQUARE RSQUARE)? cast_expression
+		"delete"^ (LSQUARE! RSQUARE!{astFactory->addASTChild(currentAST, #[MYEXPRESSION, "array"]);})? cast_expression
 	;
 
 // Same as expression
