@@ -16,7 +16,7 @@ char* p = new char[12];
 char* pData = (char*)new char[12];
 char* s1 = "my name";
 char s2[] = "my name";
-int& m = n;
+int& rm = n;
 */
 class data
 {
@@ -143,6 +143,7 @@ namespace test_case_declaration_1
 		virtual defaultreturn();
 		virtual defaultreturn2()
 		{
+			char (*pDim2)[6];
 			return 0;
 		}
 	};
@@ -395,7 +396,7 @@ namespace test_case_declaration_2
 	}
 	
 }
-*/
+
 
 namespace test_case_basic_statement
 {
@@ -428,7 +429,7 @@ namespace test_case_basic_statement
 
 	int main(int argc, char** argv)
 	{
-/*		int nResult = 0;
+		int nResult = 0;
 		int nInput = 3;
 		nResult = 10 + (nInput++ - nResult++);
 
@@ -444,23 +445,124 @@ namespace test_case_basic_statement
 
 		stricmp("myname", "myage");
 
-*/		myTest<data>* pTest = 0;
+		myTest<data>* pTest = new myTest<data>();
 		pTest->getAlloc()->m_data1.MyFunc_1();
 		myTest<data>::Sleep(0);
 
 		data* pData = 0;
-//		const data* pRaw = dynamic_cast<const data*>(pData);
+		const data* pRaw = dynamic_cast<const data*>(pData);
 
 		typedef myTest<data> *LPDATA;
 
 //		typeid(pTest->getAlloc()).name();
 //		typeid(pData).name();
 
-//		pRaw = LPDATA(pData);
+		pTest = LPDATA(pData);
 		LPDATA((void*)pData)->getAlloc()->doFoo("wife");
 		data("myname", 0).doFoo("myname");
 
+		myTest<data>* pNew = new myTest<data>();
+		unsigned char* pStrings = (unsigned char*)new char[100]; 
+
+		data **pDataArray = new data*[10];
+		char (*pDim2)[10] = new char[5][10];
+		char *str[] = {"China","Japan","English","America","Australia","Canada"}; 
+		int aDim2[2][3] = {{1,2, 3}, {2,3, 4}};
+
+		(pTest = new myTest<data>())->Sleep(0);
+
+		delete pTest;
+		delete [] pDim2;
+
 		return (int)(char)('a' + 'b');
+	}
+}
+*/
+
+namespace test_case_control_1
+{
+	void Loop();
+	void Control(int in) throw(char*)
+	{
+		int i = 0;
+		if(in == 0)
+		{
+			i+=1;
+			throw "Crash";
+		}
+		else if(in == 1)
+			i+=3;
+		else
+			i-=1;
+
+		switch(in)
+		{
+			char ch;
+		case 1:
+			i+=1;
+			break;
+		case 2:
+			{
+				char* ch2 = new char[10];
+			}
+			break;
+		default:
+			i*=1;
+			break;
+		}
+
+		__try
+		{
+			Loop();
+		}
+		__except(0) 
+		{
+		}
+	}
+
+	void Loop()
+	{
+		for(int i = 0; i < 10; i++);
+		int j = 0;
+		for(j = 0; j < 10; j++)
+		{
+			if(j==3)
+				break;
+		}
+		for(;;);
+
+		while(1)
+			if(j++ == 5) break;
+
+		while(j < 5)
+		{
+			if(j == 0)
+				continue;
+			j++;
+		}
+
+		do 
+		{
+			if(j++ == 5) goto End;
+		}while (4 == j && !(j == 3 || j== 0));
+		int* pInt = &j;
+
+		try
+		{
+			Control(8);
+		}
+		catch(char* ch1)
+		{
+			ch1[0];
+		}
+		catch(...)
+		{
+			j--;
+		}
+
+End:
+		j = j << 3;
+		j = j & 0x100;
 	}
 }
 
@@ -471,9 +573,9 @@ namespace test_case_basic_statement
 //-function parameter initialize, Function Pointer, typedef,...
 //-friend,extern,enum, union
 //-class member function pointer, operator reload, operator convertor
-//Statements: assign, if then, do while, for, return, continue, break,
-//Expression: condition expression, arithmetic expression, ++/--/+=/-=/...
-//go to, label
+//-Statements: assign, if then, do while, for, return, continue, break,
+//-Expression: condition expression, arithmetic expression, ++/--/+=/-=/...
+//-go to, label
 //throw, catch
 //cout <<, 
 //Replace import node with special classes.
