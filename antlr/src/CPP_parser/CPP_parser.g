@@ -1916,6 +1916,7 @@ statement
 		|	case_statement
 		|	default_statement
 		|	expression SEMICOLON! {end_of_stmt();}
+			{if(#statement != nullAST) #statement = #(#[MYSTATEMENT, "expression"], #statement);}
 		|	compound_statement
 		|	selection_statement
 		|	iteration_statement
@@ -2049,7 +2050,7 @@ jump_statement
 		|	"continue" SEMICOLON! {end_of_stmt();}
 		|	"break" SEMICOLON! {end_of_stmt();}
 		|	// DW 16/05/03 May be problem here if return is followed by a cast expression 
-			"return" {in_return = true;}
+			"return"^ {in_return = true;}
 			(	options{warnWhenFollowAmbig = false;}:
 				(LPAREN {(qualifiedItemIsOneOf(qiType) )}? ID RPAREN)=> 
 				LPAREN! ID RPAREN! (expression)?	// This is an unsatisfactory fix for problem in xstring re "return (allocator);"
@@ -2059,7 +2060,6 @@ jump_statement
 			|	expression 
 			)?	SEMICOLON! {in_return = false,end_of_stmt();} 
 		)
-		{#jump_statement = #(#[MYSTATEMENT, "jump"], #jump_statement);}
 	;
 
 //Add to support MSVC SEH exception. Wilson Chen, 16/7/2009
