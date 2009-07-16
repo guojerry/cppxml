@@ -2,7 +2,7 @@
 #pragma warning(disable:4430)
 namespace test_case
 {
-/*
+
 char s3[256] = {0};
 char s4[2][120];
 
@@ -17,7 +17,7 @@ char* pData = (char*)new char[12];
 char* s1 = "my name";
 char s2[] = "my name";
 int& rm = n;
-*/
+
 class data
 {
 public:
@@ -51,7 +51,7 @@ void data::data_1::MyFunc_1()
 {
 
 }
-/*
+
 namespace test_case_template_1
 {
 
@@ -180,29 +180,19 @@ typedef struct tagGoods
 }GOODS, *LPGOODS;
 LPGOODS v;
 
-MyTemplate<char> s_q;
-
 int setValue3(int v, int i)
 {
-	MyTemplate<MyTemplate<char,char>,char> q;
+	MyTemplate<MyTemplate<char,char>,char> q(0);
 	char* p;
 	int nSize = (1 + (2-4)*3);
 	p = pData;
-}
-
-//test K&R function declaration
-const char* originalFunc(param1, param2)
-char param1;char* param2; 
-{
-	printf("param1:%c\nparam2:%s\n", param1, param2);
-	return "originalFunc";
+	return 0;
 }
 
 extern int g_count;
 
 namespace test_case_function_typedef
 {
-	class STUDENT;
 	typedef struct tagSTUDENT
 	{
 		int nID;
@@ -604,7 +594,6 @@ namespace test_case_try_exception
 		puts("SEH end");
 	}
 }
-*/
 
 //-class ctor initialize, base class, template
 //-class function with scope.
