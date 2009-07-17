@@ -500,7 +500,7 @@ external_declaration
 		{
 		 #external_declaration = #[MYFUNCTION, "convertor"];
 		 if(#m != nullAST)
-			#external_declaration->addChild(RefPNode(#(#[MYFUNCTION, "specifier"], #m)));
+			#external_declaration->addChild(RefPNode(#(#[MY, "specifier"], #m)));
 		 if(#sc != nullAST)
 			#external_declaration->addChild(RefPNode(#sc));
  		 #external_declaration->addChild(RefPNode(#fc));
@@ -744,7 +744,7 @@ member_declaration
 		{if (statementTrace>=1) 
 			printf("%d member_declaration Destructor declaration\n",LT(1)->getLine());
 		}
-		dtor_head[0] (ASSIGNEQUAL! OCTALINT!{astFactory->addASTChild(currentAST,#[MYFUNCTION, "pure"]);})? SEMICOLON! {end_of_stmt();}
+		dtor_head[0] (ASSIGNEQUAL! OCTALINT!{astFactory->addASTChild(currentAST,#[MY, "pure"]);})? SEMICOLON! {end_of_stmt();}
 		{#member_declaration = #(#[MYFUNCTION, "dtor"], #member_declaration);}
 	|
 		// No template_head allowed for dtor member
@@ -780,7 +780,7 @@ member_declaration
 		{
 		 #member_declaration = #[MYFUNCTION, "convertor"];
 		 if(#m != nullAST)
-			#member_declaration->addChild(RefPNode(#(#[MYFUNCTION, "specifier"], #m)));
+			#member_declaration->addChild(RefPNode(#(#[MY, "specifier"], #m)));
  		 #member_declaration->addChild(RefPNode(#fc));
 		}
 	|  
@@ -878,7 +878,7 @@ member_declaration
 			{
 			 #fct = #(#[MYFUNCTION, "convertor"], #fct);
 	 		 if(#mt != nullAST)
-				#fct->addChild(RefPNode(#(#[MYFUNCTION, "specifier"], #mt)));
+				#fct->addChild(RefPNode(#(#[MY, "specifier"], #mt)));
 			 astFactory->addASTChild(currentAST, ANTLR_USE_NAMESPACE(antlr)RefAST(#fct));
 			}
 		|
@@ -1020,7 +1020,7 @@ specifier_prefix [bool& td, bool& fd, StorageClass& sc, TypeQualifier& tq, Funct
 		)*
 		{
 		 if(#specifier_prefix != nullAST)
-			#specifier_prefix = #(#[MYDECLAR, "specifier"], #specifier_prefix);
+			#specifier_prefix = #(#[MY, "specifier"], #specifier_prefix);
 		}
 	;
 
@@ -1038,7 +1038,7 @@ function_specifier returns [CPPParser::FunctionSpecifier fs = fsInvalid]
 	:	("inline"|"_inline"|"__inline")	{fs = fsINLINE;}
 	|	"virtual"						{fs = fsVIRTUAL;}
 	|	"explicit"						{fs = fsEXPLICIT;}
-	{#function_specifier = #(#[MYFUNCTION, "specifier"], #function_specifier);}
+	{#function_specifier = #(#[MY, "specifier"], #function_specifier);}
 	;
 
 //type_specifier
@@ -1059,12 +1059,12 @@ simple_type_specifier returns [CPPParser::TypeSpecifier ts = tsInvalid]
 	:	(
 			{qualifiedItemIsOneOf(qiType|qiCtor)}?
 			 s = qualified_type
-			{#simple_type_specifier = #(#[MYDECLAR, "type"],#simple_type_specifier);}
+			{#simple_type_specifier = #(#[MYTYPE, "type"],#simple_type_specifier);}
 		|
 			("typename"|"enum"|ts = class_specifier) 
 			 s = qualified_type
 			{declaratorID(s.c_str(),qiType);}	// This stores typename name in dictionary
-			{#simple_type_specifier = #(#[MYDECLAR, "typename"],#simple_type_specifier);}
+			{#simple_type_specifier = #(#[MYTYPE, "typename"],#simple_type_specifier);}
 		|	
 			(	"char"		{ts |= tsCHAR;}
 			|	"wchar_t"	{ts |= tsWCHAR_T;}  
@@ -1083,7 +1083,7 @@ simple_type_specifier returns [CPPParser::TypeSpecifier ts = tsInvalid]
 			|	"double"	{ts |= tsDOUBLE;}
 			|	"void"		{ts |= tsVOID;}
 			)+
-			{#simple_type_specifier = #(#[MYDECLAR, "basictype"],#simple_type_specifier);}
+			{#simple_type_specifier = #(#[MYTYPE, "basictype"],#simple_type_specifier);}
 		)
 	;
 
@@ -1111,7 +1111,7 @@ qualified_type! returns [data qit]
 		 qit = qitem01;
 		}
 		(options {warnWhenFollowAmbig = false;}:
-		 m:LESSTHAN template_argument_list GREATERTHAN{#m=#(#[MYDECLAR, "template"], returnAST);}
+		 m:LESSTHAN template_argument_list GREATERTHAN{#m=#(#[MY, "template"], returnAST);}
 		)?
 		{#qualified_type = #(id, m);}
 	;
@@ -1139,7 +1139,7 @@ class_prefix
 	(("_declspec"!|"__declspec"!) LPAREN! expression RPAREN!)*
 	{
 	 if(#class_prefix != nullAST)
-		#class_prefix = #(#[MYDECLAR, "specifier"], #class_prefix);
+		#class_prefix = #(#[MY, "specifier"], #class_prefix);
 	}
 	;
 	
@@ -1189,7 +1189,7 @@ class_decl_or_def [FunctionSpecifier fs]
 base_clause
 	:	
 		COLON! base_specifier (COMMA! base_specifier)*
-		{#base_clause = #(#[MYCLASS, "baseclass"], #base_clause);}
+		{#base_clause = #(#[MY, "baseclass"], #base_clause);}
 	;
 
 //base_specifier
@@ -1200,7 +1200,7 @@ base_specifier!
 		|	access_specifier{#s=returnAST;} (v2:"virtual")? qt = qualified_type{#q=returnAST;}
 		|	qt = qualified_type{#q=returnAST;}
 		)
-		{#base_specifier = #(#[MYCLASS, "typename"], q, #(#[MYCLASS, "specifier"], v, v2, s));}
+		{#base_specifier = #(#[MYTYPE, "typename"], q, #(#[MY, "specifier"], v, v2, s));}
 	;
 
 //access_specifier
@@ -1239,7 +1239,7 @@ enumerator_list
 //enumerator
 enumerator!
 	:	
-		id:ID (ASSIGNEQUAL! constant_expression{#id->addChild(RefPNode(#(#[MYENUM, "assign"], returnAST)));})?
+		id:ID (ASSIGNEQUAL! constant_expression{#id->addChild(RefPNode(#(#[MY, "assign"], returnAST)));})?
 		{enumElement((id->getText()).data());}	// This stores id name in dictionary
 		{#enumerator = #id;}
 	;
@@ -1296,24 +1296,24 @@ init_declarator_list
 //member_declarator
 member_declarator!
 	:	
-		((ID)? COLON constant_expression)=>m:(ID{#m=#(ID);})? COLON v:(constant_expression{#v=#(#[MYDECLAR, "bytes"], returnAST);})
-		{#member_declarator = #(#[MYDECLAR, "variables"], m, v);}
+		((ID)? COLON constant_expression)=>m:(ID{#m=#(ID);})? COLON v:(constant_expression{#v=#(#[MY, "bytes"], returnAST);})
+		{#member_declarator = #(#[MY, "variables"], m, v);}
 	|  
 		d:declarator{#d=returnAST;}
 		(
 			(ASSIGNEQUAL OCTALINT)=>ASSIGNEQUAL i:OCTALINT	// The value must be zero (for pure virtual)
-			{#i=#(#[MYEXPRESSION,"assign"], #i);}
+			{#i=#(#[MY,"assign"], #i);}
 		|	
 			ASSIGNEQUAL 
-			initializer{#i=#(#[MYEXPRESSION,"assign"], returnAST);}
+			initializer{#i=#(#[MY,"assign"], returnAST);}
 		|	
-			LPAREN expression_list RPAREN{#i=#(#[MYEXPRESSION, "ctor"], returnAST);}
+			LPAREN expression_list RPAREN{#i=#(#[MY, "ctor"], returnAST);}
 		)?
 		{
 		 if(_td==true)
-			#member_declarator = #(#[MYDECLAR,"newtype"], d, i);
+			#member_declarator = #(#[MY,"newtype"], d, i);
 		 else
-			#member_declarator = #(#[MYDECLAR,"variables"], d, i);
+			#member_declarator = #(#[MY,"variables"], d, i);
 		}
 	;
 
@@ -1323,7 +1323,7 @@ initializer
 		remainder_expression	// assignment_expression
 	|	
 		LCURLY! initializer (COMMA! (initializer)? )* RCURLY!	// Allows comma at end of list
-		{#initializer = #(#[MYDECLAR, "values"], #initializer);}
+		{#initializer = #(#[MY, "values"], #initializer);}
 	;
 
 //declarator
@@ -1364,7 +1364,7 @@ direct_declarator
 		(options {warnWhenFollowAmbig = false;}:
 		 LSQUARE! (constant_expression{astFactory->addASTChild(currentAST,ANTLR_USE_NAMESPACE(antlr)RefAST(returnAST));})? RSQUARE!)+
 		{declaratorArray();}
-		{#direct_declarator=#(QID, #(#[MYDECLAR, "array"], currentAST.root));}
+		{#direct_declarator=#(QID, #(#[MY, "array"], currentAST.root));}
 	|
 		(qualified_id RPAREN LPAREN)=>	// Must be function declaration (see function_direct_declarator)
 		id = qualified_id
@@ -1411,7 +1411,7 @@ declarator_suffix returns [int nType = 0]		// Note: Only used above in direct_de
 		//(options {warnWhenFollowAmbig = false;}:
 		(LSQUARE! (constant_expression)? RSQUARE!)+
 		{declaratorArray();nType=1;}
-		{#declarator_suffix=#(#[MYDECLAR, "array"], #declarator_suffix);}
+		{#declarator_suffix=#(#[MY, "array"], #declarator_suffix);}
 	|	
 		{(!((LA(1)==LPAREN)&&(LA(2)==ID))||(qualifiedItemIsOneOf(qiType|qiCtor,1)))}?
 		LPAREN! {declaratorParameterList(0);}
@@ -1441,7 +1441,7 @@ conversion_function_decl_or_def
 conversion_type_modifier
 	:
 	(STAR | AMPERSAND)?	// DW 01/08/03 Use type_specifier here? see syntax
-	{#conversion_type_modifier = #(#[MYDECLAR, "modifier"], #conversion_type_modifier);}
+	{#conversion_type_modifier = #(#[MY, "modifier"], #conversion_type_modifier);}
 	;
 
 //function_declaration
@@ -1510,7 +1510,7 @@ function_direct_declarator [int definition]
 		RPAREN !
 		(options{warnWhenFollowAmbig = false;}:
 		 tq = type_qualifier)*
-		(ASSIGNEQUAL! OCTALINT!{astFactory->addASTChild(currentAST,#[MYFUNCTION, "pure"]);})?	// The value of the octal must be 0, pure virtual function
+		(ASSIGNEQUAL! OCTALINT!{astFactory->addASTChild(currentAST,#[MY, "pure"]);})?	// The value of the octal must be 0, pure virtual function
 		{functionEndParameterList(definition);}
 		(exception_specification)? 
 	;
@@ -1605,7 +1605,7 @@ ctor_body
 ctor_initializer
 	:
 		COLON! superclass_init (COMMA! superclass_init)*
-		{#ctor_initializer = #(#[MYFUNCTION, "ctorinit"], #ctor_initializer);}
+		{#ctor_initializer = #(#[MY, "ctorinit"], #ctor_initializer);}
 	;
 
 //superclass_init
@@ -1613,7 +1613,7 @@ superclass_init!
 	{data q;} 
 	: 
 		q = QID:qualified_id{#QID=returnAST;} LPAREN v:(expression_list{#v=returnAST;})? RPAREN
-		{#superclass_init = #(QID, (#[MYFUNCTION, "value"], v));}
+		{#superclass_init = #(QID, (#[MY, "values"], v));}
 	;
 
 //dtor_head
@@ -1627,7 +1627,7 @@ dtor_head[int definition]
 dtor_decl_spec
 	:
 		(("inline"|"_inline"|"__inline")|"virtual")*
-		{#dtor_decl_spec = #(#[MYFUNCTION, "specifier"], #dtor_decl_spec);}
+		{#dtor_decl_spec = #(#[MY, "specifier"], #dtor_decl_spec);}
 	;
 
 //dtor_declarator
@@ -1664,7 +1664,7 @@ parameter_declaration_list
 
 parameter_initializer:
 	remainder_expression	// DW 18/4/01 assignment_expression
-	{#parameter_initializer = #(#[MYDECLAR, "assign"], #parameter_initializer);}
+	{#parameter_initializer = #(#[MY, "assign"], #parameter_initializer);}
 	;
 	
 //parameter_declaration	(See also template_parameter_declaration)
@@ -1698,7 +1698,7 @@ type_id!
 		s:declaration_specifiers{#s=returnAST;} a:abstract_declarator{#a=returnAST;}
 		{
 //		 #s->addChild(RefPNode(#a));
-		 #type_id = #(#[MYEXPRESSION, "typeid"],#s, #a);
+		 #type_id = #(#[MYTYPE, "typeid"],#s, #a);
 		}
 	;
 
@@ -1729,7 +1729,7 @@ abstract_declarator_suffix
 	:	
 	!	(LSQUARE! c:(constant_expression{#c=returnAST;})? RSQUARE!)+
 		{declaratorArray();}
-		{#abstract_declarator_suffix = #(#[MYDECLAR, "modifier"],#(#[MYDECLAR,"array"], c));}
+		{#abstract_declarator_suffix = #(#[MY, "modifier"],#(#[MYDECLAR,"array"], c));}
 	|
 		LPAREN
 		{declaratorParameterList(0);}
@@ -1759,7 +1759,7 @@ template_head
 	:	
 		"template"!
 		LESSTHAN! template_parameter_list GREATERTHAN!
-		{#template_head = #(#[MYTEMPLATE, "templatedef"], #template_head);}
+		{#template_head = #(#[MY, "templatedef"], #template_head);}
 	;
 
 //template_parameter_list
@@ -1768,7 +1768,7 @@ template_parameter_list
 		{beginTemplateParameterList();}
 		template_parameter (COMMA! template_parameter)*
 		{endTemplateParameterList();}
-		{#template_parameter_list = #(#[MYTEMPLATE, "templatelist"], #template_parameter_list);}
+		{#template_parameter_list = #(#[MY, "templatelist"], #template_parameter_list);}
 	;
 
 /* Rule requires >2 lookahead tokens. The ambiguity is resolved 
@@ -1801,16 +1801,16 @@ type_parameter!
 				{
 				templateTypeParameter((id->getText()).data());
 				}
-				as:(ASSIGNEQUAL! assigned_type_name{#as=#(#[MYEXPRESSION,"assign"], returnAST);})?
+				as:(ASSIGNEQUAL! assigned_type_name{#as=#(#[MY,"assign"], returnAST);})?
 			)?
 			{#type_parameter = #(id, as, mod);}
 		|
-			mod:template_head{#mod=#(#[MYTEMPLATE, "modifier"], returnAST);} "class" 
+			mod:template_head{#mod=#(#[MY, "modifier"], returnAST);} "class" 
 			(id2:ID
 				{
 				templateTypeParameter((id2->getText()).data());
 				}
-				(ASSIGNEQUAL! assigned_type_name{#as=#(#[MYEXPRESSION,"assign"], returnAST);})?
+				(ASSIGNEQUAL! assigned_type_name{#as=#(#[MY,"assign"], returnAST);})?
 			)?
 			{#type_parameter = #(id2, as, mod);}
 		)
@@ -1904,7 +1904,7 @@ statement
 	:
 		(	("namespace"|"using")=>
 			block_declaration
-		|	(("typedef")? class_specifier (qualified_id)? LCURLY)=>
+		|	(("typedef")? class_specifier (qualified_id)?)=>
 			member_declaration
 		|	(declaration_specifiers LPAREN ptr_operator qualified_id RPAREN)=>
 			member_declaration
@@ -1916,7 +1916,7 @@ statement
 		|	case_statement
 		|	default_statement
 		|	expression SEMICOLON! {end_of_stmt();}
-			{if(#statement != nullAST) #statement = #(#[MYSTATEMENT, "expression"], #statement);}
+			{if(#statement != nullAST) #statement = #(#[MYEXPRESSION, "expression"], #statement);}
 		|	compound_statement
 		|	selection_statement
 		|	iteration_statement
@@ -1950,7 +1950,7 @@ simple_declaration
 labeled_statement!
 	:	
 		id:ID COLON s:statement
-		{#labeled_statement = #(#[MYSTATEMENT, "label"], id);
+		{#labeled_statement = #(#[MY, "label"], id);
 		 #labeled_statement->setNextSibling(ANTLR_USE_NAMESPACE(antlr)RefAST(#s));
 		}
 	;
@@ -1959,14 +1959,14 @@ labeled_statement!
 case_statement!
 	:	"case"
 		ce:constant_expression COLON s:statement
-		{#case_statement = #(#[MYSTATEMENT, "case"], #(#[MYEXPRESSION,"value"],#ce), #(#[MYEXPRESSION,"body"], #s));}
+		{#case_statement = #(#[MY, "case"], #(#[MYEXPRESSION,"value"],#ce), #(#[MYEXPRESSION,"body"], #s));}
 	;
 
 //default_statement
 default_statement!
 	:	
 		"default" COLON s:statement
-		{#default_statement = #(#[MYSTATEMENT, "default"], #(#[MYEXPRESSION,"body"], #s));}
+		{#default_statement = #(#[MY, "default"], #(#[MYEXPRESSION,"body"], #s));}
 	;
 
 //compound_statement
@@ -1995,7 +1995,7 @@ selection_statement
 		(options {warnWhenFollowAmbig = false;}:
 		 "else" right:statement)?
 		{exitLocalScope();}
-		{#selection_statement = #(#[MYEXPRESSION, "if"], condition, #(#[MYEXPRESSION, "left"], left), #(#[MYEXPRESSION, "right"], right));}
+		{#selection_statement = #(#[MYSTATEMENT, "if"], condition, #(#[MYEXPRESSION, "left"], left), #(#[MYEXPRESSION, "right"], right));}
 	|	
 		"switch"^ LPAREN!
 		{enterNewLocalScope();}
@@ -2011,7 +2011,7 @@ iteration_statement!
 		c0:condition RPAREN 
 		s0:statement  
 		{exitLocalScope();}
-		{#iteration_statement = #(#[MYSTATEMENT, "while"], c0, #(#[MYSTATEMENT, "body"], s0));}
+		{#iteration_statement = #(#[MYSTATEMENT, "while"], c0, #(#[MY, "body"], s0));}
 	|	
 		"do"
 		{enterNewLocalScope();}
@@ -2019,7 +2019,7 @@ iteration_statement!
 		LPAREN e0:expression RPAREN
 		{exitLocalScope();}
 		SEMICOLON {end_of_stmt();} 
-		{#iteration_statement = #(#[MYSTATEMENT, "do"], #(#[MYSTATEMENT, "body"], s1), #(#[MYSTATEMENT, "while"], e0));}
+		{#iteration_statement = #(#[MYSTATEMENT, "do"], #(#[MY, "body"], s1), #(#[MY, "while"], e0));}
 	|	
 		"for" LPAREN
 		{enterNewLocalScope();}
@@ -2030,7 +2030,7 @@ iteration_statement!
 		(e2:expression)?
 		RPAREN s:statement	 
 		{exitLocalScope();}
-		{#iteration_statement = #(#[MYSTATEMENT, "for"], #(#[MYSTATEMENT, "init"], d, e1), c, #(#[MYSTATEMENT, "iterator"], e2), #(#[MYSTATEMENT, "body"], s));}
+		{#iteration_statement = #(#[MYSTATEMENT, "for"], #(#[MY, "init"], d, e1), c, #(#[MY, "iterator"], e2), #(#[MY, "body"], s));}
 	;
 
 //condition
@@ -2039,7 +2039,7 @@ condition
 		(	(declaration_specifiers declarator ASSIGNEQUAL)=> 
 			 declaration_specifiers declarator ASSIGNEQUAL remainder_expression
 		|	expression
-		{#condition = #(#[MYEXPRESSION, "condition"], #condition);}
+		{#condition = #(#[MY, "condition"], #condition);}
 		)
 	;
 
@@ -2073,13 +2073,13 @@ ep_try_block
 ep_exception!
 	:	
 		"__except" LPAREN e:expression RPAREN s:compound_statement
-		{#ep_exception = #(#[MYEXPRESSION, "__except"], #(#[MYEXPRESSION, "condition"], e), s);}
+		{#ep_exception = #(#[MY, "__except"], #(#[MY, "condition"], e), s);}
 	;
 	
 //ep_finally
 ep_finally
 	:
-		"__finally" compound_statement
+		"__finally"^ compound_statement
 	;
 	
 //try_block
@@ -2104,7 +2104,7 @@ handler
 exception_declaration
 	:	
 		parameter_declaration_list
-		{#exception_declaration = #(#[MYDECLAR, "exceptions"], #exception_declaration);}
+		{#exception_declaration = #(#[MY, "exceptions"], #exception_declaration);}
 	;
 
 /* This is an expression of type void according to the ARM, which
@@ -2191,7 +2191,7 @@ conditional_expression!
 		(QUESTIONMARK e:expression COLON v:conditional_expression {bQuestion = true;})?
 		{
 			if(bQuestion==true)
-				#conditional_expression = #(#[MYEXPRESSION, "ifexp"], #(#[MYEXPRESSION, "condition"],l), #(#[MYEXPRESSION, "left"], e), #(#[MYEXPRESSION, "right"], v));
+				#conditional_expression = #(#[MYSTATEMENT, "ifexp"], #(#[MY, "condition"],l), #(#[MY, "left"], e), #(#[MY, "right"], v));
 			else
 				#conditional_expression = #l;
 		}
@@ -2329,12 +2329,12 @@ cast_expression
 	:
 		(LPAREN type_id RPAREN unary_expression)=>
 		 LPAREN! type_id RPAREN! unary_expression
-		{#cast_expression = #(#[MYEXPRESSION, "cast"], #cast_expression);}	
+		{#cast_expression = #(#[MY, "cast"], #cast_expression);}	
 	|
 		// Believe it or not, you can get more than one cast expression in sequence
 		(LPAREN type_id RPAREN cast_expression)=>
 		 LPAREN! type_id RPAREN! cast_expression
-		{#cast_expression = #(#[MYEXPRESSION, "cast"], #cast_expression);}	
+		{#cast_expression = #(#[MY, "cast"], #cast_expression);}	
 	|  
 		unary_expression	// handles outer (...) of "(T(expr))"
 	
@@ -2388,7 +2388,7 @@ postfix_expression [RefPNode recur = RefPNode(nullAST)]
 		(ts = simple_type_specifier LPAREN)=>
 		 ts = tss:simple_type_specifier LPAREN (tel:expression_list)? RPAREN
 		{
-		 #tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"convertor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
+		 #tss = #(#tdot, #(#[MYCALL, "call"], #(#[MY,"convertor"], #tss), #(#[MY, "parameters"], #tel)));
 		 #ps = #tss;
 		}
 		// Following put in to allow for the above being a constructor as shown in test_constructors_destructors.cpp
@@ -2396,7 +2396,7 @@ postfix_expression [RefPNode recur = RefPNode(nullAST)]
 		(bDot=tdot:dot_expression 
 			{
 			if(bDot==true)
-				#tss = #(#tdot, #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION,"ctor"], #tss), #(#[MYEXPRESSION, "parameters"], #tel)));
+				#tss = #(#tdot, #(#[MYCALL, "call"], #(#[MY,"ctor"], #tss), #(#[MY, "parameters"], #tel)));
 			}
 		ps:postfix_expression[#tss])?
 		{#postfix_expression=#ps;}
@@ -2406,16 +2406,16 @@ postfix_expression [RefPNode recur = RefPNode(nullAST)]
         	array:(LSQUARE expression RSQUARE) 
         	{
         	 if(#array == nullAST)
-        		#array = #[MYEXPRESSION, "array"];
+        		#array = #[MY, "array"];
         	 #array->addChild(returnAST);
         	}
 		|	
 			LPAREN (el:expression_list)? RPAREN 
-			{#p = #(#[MYEXPRESSION, "call"], #(#[MYEXPRESSION, "function"],#p), #(#[MYEXPRESSION, "parameters"], #el));}
+			{#p = #(#[MYCALL, "call"], #(#[MY, "function"],#p), #(#[MY, "parameters"], #el));}
 		|	bDot=ob:dot_expression (t:"template")? id:id_expression
 			{ #p = #(id, #(ob, p), t);	}
-		|	PLUSPLUS {#p->addChild(RefPNode(#[MYEXPRESSION, "++"]));}
-		|	MINUSMINUS {#p->addChild(RefPNode(#[MYEXPRESSION, "--"]));}
+		|	PLUSPLUS {#p->addChild(RefPNode(#[MY, "++"]));}
+		|	MINUSMINUS {#p->addChild(RefPNode(#[MY, "--"]));}
 		)*
 		{ 
 		 if(#array != nullAST)
@@ -2437,7 +2437,7 @@ postfix_expression [RefPNode recur = RefPNode(nullAST)]
 cast_type returns [CPPParser::TypeSpecifier ts]
 	:
 	LESSTHAN! ("const")? ts = type_specifier (ptr_operator)? GREATERTHAN!
-	{#cast_type=#(#[MYEXPRESSION, "casttype"], #cast_type);}
+	{#cast_type=#(#[MY, "casttype"], #cast_type);}
 	;
 	
 //dot_expression
@@ -2513,7 +2513,7 @@ new_expression
 new_initializer
 	:	
 		LPAREN! (expression_list)? RPAREN!
-		{#new_initializer = #(#[MYEXPRESSION, "parameters"], #new_initializer);}
+		{#new_initializer = #(#[MY, "parameters"], #new_initializer);}
 	;
 
 //new_type_id
@@ -2550,7 +2550,7 @@ direct_new_declarator
 		(options {warnWhenFollowAmbig = false;}:
 			LSQUARE! expression RSQUARE!
 		)+
-	{#direct_new_declarator = #(#[MYSTATEMENT, "array"], #direct_new_declarator);}
+	{#direct_new_declarator = #(#[MY, "array"], #direct_new_declarator);}
 	;
 
 //ptr_operator
@@ -2567,7 +2567,7 @@ ptr_operator
 		|	(s = scope_override STAR cv_qualifier_seq)=>
 			 s = scope_override STAR {is_pointer = true;} cv_qualifier_seq
 		)	
-	{#ptr_operator=#(#[MYDECLAR, "modifier"], #ptr_operator);}
+	{#ptr_operator=#(#[MY, "modifier"], #ptr_operator);}
    ;
 
 // Match A::B::*	// May be redundant 14/06/06
@@ -2599,11 +2599,11 @@ scope_override! returns [data so]
 		(	options {warnWhenFollowAmbig = false;}:
 			(ID LESSTHAN template_argument_list GREATERTHAN SCOPE)=>
 			id1:ID {strcat(sitem,(id1->getText()).data());}
-			LESSTHAN template_argument_list GREATERTHAN {#id1=#(id1, (#[MYTEMPLATE, "templatelist"], returnAST));}// {strcat(sitem,"<...>");}
+			LESSTHAN template_argument_list GREATERTHAN {#id1=#(id1, (#[MY, "templatelist"], returnAST));}// {strcat(sitem,"<...>");}
 			SCOPE{strcat(sitem,"::");}
 			(tp1:"template" {strcat(sitem,"template");#id1->getFirstChild()->setNextSibling(ANTLR_USE_NAMESPACE(antlr)RefAST(#tp1));})?
 			{
-			 if(#scope_override == nullAST)	#scope_override=#[MYCLASS, "scope"];
+			 if(#scope_override == nullAST)	#scope_override=#[MY, "scope"];
 			 #scope_override->addChild(#id1);
 			}
 		|	
@@ -2611,7 +2611,7 @@ scope_override! returns [data so]
 			SCOPE {strcat(sitem,"::");}
 			(tp2:"template" {strcat(sitem,"template");#id2->addChild(#tp2);})?
 			{
-			 if(#scope_override == nullAST)	#scope_override=#[MYCLASS, "scope"];
+			 if(#scope_override == nullAST)	#scope_override=#[MY, "scope"];
 			 #scope_override->addChild(#id2);
 			}
 		)*
@@ -2623,7 +2623,7 @@ scope_override! returns [data so]
 //delete_expression
 delete_expression
 	:	
-		"delete"^ (LSQUARE! RSQUARE!{astFactory->addASTChild(currentAST, #[MYEXPRESSION, "array"]);})? cast_expression
+		"delete"^ (LSQUARE! RSQUARE!{astFactory->addASTChild(currentAST, #[MY, "array"]);})? cast_expression
 	;
 
 // Same as expression
@@ -2708,17 +2708,21 @@ options
 tokens
 	{
 	OPERATOR = "operator";
-	MYFUNCTION;
+	MY;
+	MYFUNCTION<AST=CFunctionNode>;
 	MYPARAM;
-	MYDECLAR;
-	MYEXPRESSION;
+	MYDECLAR<AST=CDeclarationNode>;
+	MYEXPRESSION<AST=CExpressionNode>;
 	MYBODY;
 	MYSTATEMENT;
-	MYCLASS;
-	MYTEMPLATE;
-	MYNAMESPACE;
-	MYTYPEDEF;
+	MYCLASS<AST=CClassNode>;
+	MYTEMPLATE<AST=CTemplateNode>;
+	MYNAMESPACE<AST=CNamespaceNode>;
+	MYTYPEDEF<AST=CTypedefNode>;
 	MYENUM;
+	MYTYPE<AST=CTypeNode>;
+	MYCALL;
+	MYNEW;
 	}
 
 {
