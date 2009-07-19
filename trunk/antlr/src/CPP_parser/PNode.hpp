@@ -3,6 +3,9 @@
 
 #include "antlr/CommonAST.hpp"
 
+#define OUTPUT_DEBUG	1 ? 1 : printf
+#define OUTPUT_ERROR	OUTPUT_DEBUG
+
 ANTLR_USING_NAMESPACE(std)
 ANTLR_USING_NAMESPACE(antlr)
 
@@ -30,11 +33,12 @@ public:
 	virtual void setFilename(const char* fn);
 	virtual int getLine(void) const;
 	virtual string getFilename() const;
-	virtual void xmlSerialize(fstream)
+	virtual void xmlSerialize(ofstream& fout);
 
 	static RefAST factory(void);
+	bool IsVirtual(){return lineNumber == 0;}
 
-private:
+protected:
 	int		lineNumber;
 	string  filename;
 };
@@ -74,6 +78,7 @@ public:
 	virtual ~CNamespaceNode(){}
 
 public:
+	virtual void xmlSerialize(ofstream& fout);
 	static RefAST factory(void)
 	{
 		antlr::RefAST ret = static_cast<RefAST>(RefPNode(new CNamespaceNode));

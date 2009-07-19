@@ -9,7 +9,7 @@ char s4[2][120];
 extern int e_int = 0;
 int k, l = 3, m;
 static int i;
-int j = 3;
+double j = 3.0e+3;
 char *a, b;
 int n = 3*(3 + (2 - 1));
 char* p = new char[12];
@@ -607,8 +607,9 @@ namespace test_case_try_exception
 //-go to, label
 //-throw, catch, __try, __except
 //-cout <<, 
-//Replace import node with special classes.
+//-Replace import node with special classes.
 //XML exports
+//test more with .i files, excludes outer files from the output XML.
 
 namespace test_case_typeid_2
 {
