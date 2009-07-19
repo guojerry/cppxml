@@ -123,7 +123,7 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 	// Skip sequences of T:: or T<...>::
 	// DW 11/02/05 Note that LT(k)->getType() is not a "type" but a type of token, eg. ID, See STDCTokenTypes.hpp
 	//firstIsTypeName((LT(k)->getText()).data());
-	//printf("support.cpp qualifiedItemIs while reached k %d %s token %d isType %d, isClass %d, guessing %d\n",
+	//OUTPUT_DEBUG("support.cpp qualifiedItemIs while reached k %d %s token %d isType %d, isClass %d, guessing %d\n",
 	//	k,(LT(k)->getText()).data(),LT(k)->getType(),isTypeName((LT(k)->getText()).data()),isClassName((LT(k)->getText()).data()), inputState->guessing);
 	while (LT(k)->getType() == ID && isTypeName((LT(k)->getText()).data()))
 		{// If this type is the same as the last type, then ctor
@@ -132,11 +132,11 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 			{// Like T::T
 			// As an extra check, do not allow T::T::
 			if (LT(k+1)->getType() == SCOPE)
-				{//printf("support.cpp qualifiedItemIs qiInvalid returned\n");
+				{//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiInvalid returned\n");
 				return qiInvalid;
 				} 
 			else 
-				{//printf("support.cpp qualifiedItemIs qiCtor_1 returned %s %s %s \n",
+				{//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiCtor_1 returned %s %s %s \n",
 				//enclosingClass,(LT(lookahead_offset+1)->getText()).data(),
 				//(LT(final_type_idx)->getText()).data());
 				return qiCtor;
@@ -154,9 +154,9 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 		if (LT(k)->getType() == LESSTHAN)
 			{
 			if (!skipTemplateQualifiers(k))
-				{//printf("support.cpp qualifiedItemIs qiInvalid_2 returned\n");
+				{//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiInvalid_2 returned\n");
 				return qiInvalid;}
-			//printf("support.cpp qualifiedItemIs template skipped, k %d\n",k);
+			//OUTPUT_DEBUG("support.cpp qualifiedItemIs template skipped, k %d\n",k);
 			// k has been updated to token following <...>
 			}
 
@@ -168,22 +168,22 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 			{
 			// Return ctor if last type is in containing class
 			// We already checked for T::T inside loop
-			//printf("support.cpp qualifiedItemIs qiCtor_2 entered %s %s %s\n",
+			//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiCtor_2 entered %s %s %s\n",
 			//	enclosingClass,(LT(lookahead_offset+1)->getText()).data(),
 			//	(LT(final_type_idx)->getText()).data());
 			if (strcmp(enclosingClass,(LT(final_type_idx)->getText()).data())==0) 
-				{//printf("support.cpp qualifiedItemIs qiCtor_2 returned\n");
+				{//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiCtor_2 returned\n");
 				return qiCtor;
 				} 
 			else 
-				{//printf("support.cpp qualifiedItemIs qiType_1 returned\n");
+				{//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiType_1 returned\n");
 				return qiType;
 				}
 			}
 		}
 
 	// LT(k) is not an ID, or it is an ID but not a typename.
-	//printf("support.cpp qualifiedItemIs second switch reached with type %d\n",LT(k)->getType());
+	//OUTPUT_DEBUG("support.cpp qualifiedItemIs second switch reached with type %d\n",LT(k)->getType());
 	switch (LT(k)->getType())
 		{
 		case ID:
@@ -191,24 +191,24 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 			// Do not allow id::
 			if (LT(k+1)->getType() == SCOPE)
 				{
-				//printf("support.cpp qualifiedItemIs qiInvalid_3 returned\n");
+				//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiInvalid_3 returned\n");
 				return qiInvalid;
 				}
 			if (strcmp(enclosingClass,(LT(k)->getText()).data())==0 ) 
 				{// Like class T  T()
-				//printf("support.cpp qualifiedItemIs qiCtor_3 returned %s\n",enclosingClass);
+				//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiCtor_3 returned %s\n",enclosingClass);
 				return qiCtor;
 				}
 			else 
 				{
 				if (isTypeName((LT(k)->getText()).data()))
 					{
-					//printf("support.cpp qualifiedItemIs qiType_2 returned\n");
+					//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiType_2 returned\n");
 					return qiType;
 					}
 	            else 			
 					{
-					//printf("support.cpp qualifiedItemIs qiVar returned\n");
+					//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiVar returned\n");
 					return qiVar;	// DW 19/03/04 was qiVar Could be function, qiFun?
 					}
 				}
@@ -219,12 +219,12 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 				LT(k+2)->getType() != SCOPE)
 				{// Like ~B or A::B::~B
 				 // Also (incorrectly?) matches ::~A.
-				//printf("support.cpp qualifiedItemIs qiDtor returned\n");
+				//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiDtor returned\n");
 				return qiDtor;
 				} 
 			else 
 				{// ~a or ~A::a is qiInvalid
-				//printf("support.cpp qualifiedItemIs qiInvalid_4 returned\n");
+				//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiInvalid_4 returned\n");
 				return qiInvalid;
 				}
 			break;
@@ -233,20 +233,20 @@ CPPParser::qualifiedItemIs(int lookahead_offset)
 			// Do not allow * or ::*
 			if (final_type_idx == 0)
 				{// Haven't seen a type yet
-				//printf("support.cpp qualifiedItemIs qiInvalid_5 returned\n");
+				//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiInvalid_5 returned\n");
 				return qiInvalid;
 				} 
 			else 
-				{//printf("support.cpp qualifiedItemIs qiPtrMember returned\n");
+				{//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiPtrMember returned\n");
 				return qiPtrMember;}
 		case OPERATOR:
 			// Like A::operator, ::operator, or operator
-			//printf("support.cpp qualifiedItemIs qiOperator returned\n");
+			//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiOperator returned\n");
 			return qiOperator;
 		default:
 			// Something that neither starts with :: or ID, or
 			// a :: not followed by ID, operator, ~, or *
-			//printf("support.cpp qualifiedItemIs qiInvalid_6 returned\n");
+			//OUTPUT_DEBUG("support.cpp qualifiedItemIs qiInvalid_6 returned\n");
 			return qiInvalid;
 		}
 	}
@@ -338,9 +338,9 @@ skipNestedParens(int& kInOut)
 int CPPParser::
 scopedItem(int k)
 	{
-	printf("support.cpp scopedItem k %d\n",k);
-	printf("support.cpp type %d finalQualifier %d\n",ID,!finalQualifier(k));
-	printf("support.cpp return %d \n",(LT(k)->getType()==ID && !finalQualifier(k)));
+	OUTPUT_DEBUG("support.cpp scopedItem k %d\n",k);
+	OUTPUT_DEBUG("support.cpp type %d finalQualifier %d\n",ID,!finalQualifier(k));
+	OUTPUT_DEBUG("support.cpp return %d \n",(LT(k)->getType()==ID && !finalQualifier(k)));
 	return (LT(k)->getType()==ID && !finalQualifier(k));
 //	return (LT(k)->getType()==SCOPE ||
 //			(LT(k)->getType()==ID && !finalQualifier(k)));
@@ -379,13 +379,13 @@ finalQualifier(int k)
 int CPPParser::
 isTypeName(const char *s)
 	{
-	//printf("isTypeName entered with %s\n",s);
+	//OUTPUT_DEBUG("isTypeName entered with %s\n",s);
 	// To look for any type name only
 	CPPSymbol *cs = (CPPSymbol *) symbols->lookup(s,CPPSymbol::otTypename);
 
 	if (cs==NULL)
 		{
-		//printf("support.cpp isTypeName %s not found in dictionary\n",s);
+		//OUTPUT_DEBUG("support.cpp isTypeName %s not found in dictionary\n",s);
 		return 0;
 		}
 
@@ -400,7 +400,7 @@ isTypeName(const char *s)
 		}
 	else
 		{// Warning to detect any failure of above 07/06/06
-		printf("Support isTypeName warning symbol %s not type name\n",s);
+		OUTPUT_DEBUG("Support isTypeName warning symbol %s not type name\n",s);
 		}
 
 	return 0;
@@ -417,11 +417,11 @@ firstIsTypeName(const char *s)
 	
 	if (cs==NULL)
 		{
-		//printf("support.cpp isTypeName %s not found in dictionary\n",s);
+		//OUTPUT_DEBUG("support.cpp isTypeName %s not found in dictionary\n",s);
 		return 0;
 		}
 
-	//printf("support firstIsClassName this-scope %d\n",cs->this_scope);
+	//OUTPUT_DEBUG("support firstIsClassName this-scope %d\n",cs->this_scope);
 
 	if (cs->getType()==CPPSymbol::otTypedef||
 		cs->getType()==CPPSymbol::otEnum||
@@ -479,10 +479,10 @@ endFunctionDefinition()
 	{
 	// Remove parameter scope
 	symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
-	//printf("endFunctionDefinition remove parameter scope(%d):\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("endFunctionDefinition remove parameter scope(%d):\n",symbols->getCurrentScopeIndex());
 	symbols->removeScope();		// Remove symbols stored in current scope
 	symbols->restoreScope();	// Reduce currentScope (higher level)
-	//printf("endFunctionDefinition restoreScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("endFunctionDefinition restoreScope() now %d\n",symbols->getCurrentScopeIndex());
 	functionDefinition = 0;
 	}
 
@@ -496,7 +496,7 @@ endConstructorDefinition()
 	symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
 	symbols->removeScope();		// Remove symbols stored in current scope
 	symbols->restoreScope();	// Reduce currentScope (higher level)
-	//printf("endConstructorDefinition restoreScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("endConstructorDefinition restoreScope() now %d\n",symbols->getCurrentScopeIndex());
 	functionDefinition = 0;
 	}
 
@@ -518,7 +518,7 @@ endDestructorDefinition()
 	symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
 	symbols->removeScope();		// Remove symbols stored in current scope
 	symbols->restoreScope();	// Reduce currentScope (higher level)
-	//printf("endDestructorDefinition restoreScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("endDestructorDefinition restoreScope() now %d\n",symbols->getCurrentScopeIndex());
 	functionDefinition = 0;
 	}
 
@@ -542,7 +542,7 @@ void CPPParser::
 declarationSpecifier(bool td, bool fd, StorageClass sc, TypeQualifier tq,
 			 TypeSpecifier ts, FunctionSpecifier fs)
 	{
-	//printf("support.cpp declarationSpecifier td %d, fd %d, sc %d, tq %d, ts %d, fs %d\n",
+	//OUTPUT_DEBUG("support.cpp declarationSpecifier td %d, fd %d, sc %d, tq %d, ts %d, fs %d\n",
 	//	td,fd,sc,tq,ts,fs);
 	_td = td;	// For typedef
 	_fd = fd;	// For friend
@@ -559,8 +559,8 @@ declarationSpecifier(bool td, bool fd, StorageClass sc, TypeQualifier tq,
 void CPPParser::
 declaratorID(const char *id,QualifiedItem qi)
 	{
-	//printf("Support.cpp declaratorID entered for %s at ptr %d, type %d\n",id,id,qi);
-	//printf("Support.cpp declaratorID %d %s found, _ts = %d, _td = %d, qi = %d \n",
+	//OUTPUT_DEBUG("Support.cpp declaratorID entered for %s at ptr %d, type %d\n",id,id,qi);
+	//OUTPUT_DEBUG("Support.cpp declaratorID %d %s found, _ts = %d, _td = %d, qi = %d \n",
 	//      lineNo,id,_ts,_td,qi);
 	CPPSymbol *c = NULL;
 
@@ -572,7 +572,7 @@ declaratorID(const char *id,QualifiedItem qi)
 		{
 		CPPSymbol *c = (CPPSymbol *) symbols->lookup(id,CPPSymbol::otTypename);
 		if (statementTrace >= 2)
-			printf("%d support.cpp declaratorID %s already stored in dictionary, ObjectType %d\n",
+			OUTPUT_DEBUG("%d support.cpp declaratorID %s already stored in dictionary, ObjectType %d\n",
 				lineNo,id,c->getType());
 		return;
 		}
@@ -580,43 +580,43 @@ declaratorID(const char *id,QualifiedItem qi)
 	if (qi==qiType)	// Check for type declaration
 		{
 		c = new CPPSymbol(id, CPPSymbol::otTypedef);
-		//printf("Support.cpp declaratorID00 id %s\n",id);
+		//OUTPUT_DEBUG("Support.cpp declaratorID00 id %s\n",id);
 		if (c==NULL) panic("can't alloc CPPSymbol");
 		symbols->defineInScope(id, c, externalScope);
-		//printf("Support.cpp declaratorID01 id %s\n",id);
+		//OUTPUT_DEBUG("Support.cpp declaratorID01 id %s\n",id);
 		if(statementTrace >= 2)
 			{
-			printf("%d support.cpp declaratorID declare %s in external scope 1, ObjectType %d\n",
+			OUTPUT_DEBUG("%d support.cpp declaratorID declare %s in external scope 1, ObjectType %d\n",
 				lineNo,id,c->getType());
 			}
-		//printf("Support.cpp declaratorID03 id %s\n",id);
+		//OUTPUT_DEBUG("Support.cpp declaratorID03 id %s\n",id);
 		// DW 04/08/03 Scoping not fully implemented
 		// Typedefs all recorded in 'external' scope and therefor never removed
 		}
 	else if (qi==qiFun)	// Check for function declaration
 		{
-		//printf("Support.cpp declaratorID02 id %d id %s\n",id,id);
+		//OUTPUT_DEBUG("Support.cpp declaratorID02 id %d id %s\n",id,id);
 		c = new CPPSymbol(id, CPPSymbol::otFunction);
 		if (c==NULL) panic("can't alloc CPPSymbol");
 		symbols->define(id, c);	// Add to current scope
-		//printf("Support.cpp declaratorID04 id %d id %s\n",id,id);
+		//OUTPUT_DEBUG("Support.cpp declaratorID04 id %d id %s\n",id,id);
 		if(statementTrace >= 2)
 			{
-			printf("%d support.cpp declaratorID declare %s in current scope %d, ObjectType %d\n",
+			OUTPUT_DEBUG("%d support.cpp declaratorID declare %s in current scope %d, ObjectType %d\n",
 				lineNo,id,symbols->getCurrentScopeIndex(),c->getType());
 			}
 		}
 	else	   
 		{
 		if (qi!=qiVar)
-			fprintf(stderr,"%d support.cpp declaratorID warning qi (%d) not qiVar (%d) for %s\n",
+			OUTPUT_ERROR("%d support.cpp declaratorID warning qi (%d) not qiVar (%d) for %s\n",
 				lineNo,qi,qiVar,id); 
 
 		c = new CPPSymbol(id, CPPSymbol::otVariable);
 		if (c==NULL) panic("can't alloc CPPSymbol");
 		symbols->define(id, c);	// Add to current scope
 		if(statementTrace >= 2)
-			printf("%d support.cpp declaratorID declare %s in current scope %d, ObjectType %d\n",
+			OUTPUT_DEBUG("%d support.cpp declaratorID declare %s in current scope %d, ObjectType %d\n",
 				lineNo,id,symbols->getCurrentScopeIndex(),c->getType());
 		}
 	}
@@ -641,7 +641,7 @@ void CPPParser::
 declaratorParameterList(int def)
 	{
 	symbols->saveScope();	// Advance currentScope (lower level)
-	//printf("declaratorParameterList saveScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("declaratorParameterList saveScope() now %d\n",symbols->getCurrentScopeIndex());
 	}
 
 void CPPParser::
@@ -652,7 +652,7 @@ declaratorEndParameterList(int def)
 		symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
 		symbols->removeScope();		// Remove symbols stored in current scope
 		symbols->restoreScope();	// Reduce currentScope (higher level)
-		//printf("declaratorEndParameterList restoreScope() now %d\n",symbols->getCurrentScopeIndex());
+		//OUTPUT_DEBUG("declaratorEndParameterList restoreScope() now %d\n",symbols->getCurrentScopeIndex());
 		}
 	}
 
@@ -660,7 +660,7 @@ void CPPParser::
 functionParameterList()
 	{
 	symbols->saveScope();	// Advance currentScope (lower level)
-	//printf("functionParameterList saveScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("functionParameterList saveScope() now %d\n",symbols->getCurrentScopeIndex());
 	// DW 25/3/97 change flag from function to parameter list
 	// DW 07/03/07 Taken out because it caused a problem when function declared within function and
 	//               it was not actually used anywhere. (See in_parameter_list)
@@ -676,7 +676,7 @@ functionEndParameterList(int def)
 		symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
 		symbols->removeScope();		// Remove symbols stored in current scope
 		symbols->restoreScope();	// Reduce currentScope (higher level)
-		//printf("functionEndParameterList restoreScope() now %d\n",symbols->getCurrentScopeIndex());
+		//OUTPUT_DEBUG("functionEndParameterList restoreScope() now %d\n",symbols->getCurrentScopeIndex());
 		}
 	else
 		{
@@ -690,7 +690,7 @@ void CPPParser::
 enterNewLocalScope()
 	{
 	symbols->saveScope();	// Advance currentScope (lower level)
-	//printf("enterNewLocalScope saveScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("enterNewLocalScope saveScope() now %d\n",symbols->getCurrentScopeIndex());
 	}
 
 void CPPParser::
@@ -699,7 +699,7 @@ exitLocalScope()
 	symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
 	symbols->removeScope();		// Remove symbols stored in current scope
 	symbols->restoreScope();	// Reduce currentScope (higher level)
-	//printf("exitLocalScope restoreScope() now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("exitLocalScope restoreScope() now %d\n",symbols->getCurrentScopeIndex());
 	}
 
 void CPPParser::
@@ -720,9 +720,9 @@ exitExternalScope()
 	symbols->restoreScope();	// Reduce currentScope (higher level)
 
 	if (symbols->getCurrentScopeIndex()==0)
-		fprintf(stdout,"\nSupport exitExternalScope, scope now %d as required\n",symbols->getCurrentScopeIndex());
+		OUTPUT_DEBUG("\nSupport exitExternalScope, scope now %d as required\n",symbols->getCurrentScopeIndex());
 	else
-		fprintf(stderr,"\nSupport exitExternalScope, scope now %d, should be 0\n",symbols->getCurrentScopeIndex());
+		OUTPUT_ERROR("\nSupport exitExternalScope, scope now %d, should be 0\n",symbols->getCurrentScopeIndex());
 	}
 
 void CPPParser::
@@ -738,7 +738,7 @@ classForwardDeclaration(const char *tag, TypeSpecifier ts, FunctionSpecifier fs)
 		{
 		CPPSymbol *cs = (CPPSymbol *) symbols->lookup(tag,CPPSymbol::otTypename);
 		if (statementTrace >= 2)
-			printf("%d support.cpp classForwardDeclaration %s already stored in dictionary, ObjectType %d\n",
+			OUTPUT_DEBUG("%d support.cpp classForwardDeclaration %s already stored in dictionary, ObjectType %d\n",
 				lineNo,tag,cs->getType());
 		return;
 		}
@@ -760,7 +760,7 @@ classForwardDeclaration(const char *tag, TypeSpecifier ts, FunctionSpecifier fs)
 
 	symbols->defineInScope(tag, c, externalScope);
 	if (statementTrace >= 2)
-		printf("%d support.cpp classForwardDeclaration declare %s in external scope, ObjectType %d\n",
+		OUTPUT_DEBUG("%d support.cpp classForwardDeclaration declare %s in external scope, ObjectType %d\n",
 			lineNo,tag,c->getType());
 
 	// If it's a friend class forward decl, put in global scope also.
@@ -771,7 +771,7 @@ classForwardDeclaration(const char *tag, TypeSpecifier ts, FunctionSpecifier fs)
 	//	if ( ext_c==NULL ) panic("can't alloc CPPSymbol");
 	//	if ( symbols->getCurrentScopeIndex()!=externalScope )	// DW 04/07/03 Not sure this test is really necessary
 	//		{
-	//		printf("classForwardDeclaration defineInScope(externalScope)\n");
+	//		OUTPUT_DEBUG("classForwardDeclaration defineInScope(externalScope)\n");
 	//		symbols->defineInScope(tag, ext_c, externalScope);
 	//		}
 	//	}
@@ -790,9 +790,9 @@ beginClassDefinition(const char *tag, TypeSpecifier ts)
 	if (symbols->lookup(tag,CPPSymbol::otTypename) != NULL)
 		{
 		symbols->saveScope();   // still have to use scope to collect members
-		//printf("support.cpp beginClassDefinition_1 saveScope() now %d\n",symbols->getCurrentScopeIndex());
+		//OUTPUT_DEBUG("support.cpp beginClassDefinition_1 saveScope() now %d\n",symbols->getCurrentScopeIndex());
 		if (statementTrace >= 2)
-			printf("%d support.cpp beginClassDefinition classname %s already in dictionary\n",
+			OUTPUT_DEBUG("%d support.cpp beginClassDefinition classname %s already in dictionary\n",
 				lineNo,tag);
 		return;
 		}
@@ -814,7 +814,7 @@ beginClassDefinition(const char *tag, TypeSpecifier ts)
 	symbols->defineInScope(tag, c, externalScope);
 
 	if (statementTrace >= 2)
-		printf("%d support.cpp beginClassDefinition define %s in external scope (1), ObjectType %d\n",
+		OUTPUT_DEBUG("%d support.cpp beginClassDefinition define %s in external scope (1), ObjectType %d\n",
 			lineNo,tag,c->getType());
 
 	strcat(qualifierPrefix, tag);
@@ -849,7 +849,7 @@ enumElement(const char *e)
 	if (c==NULL) panic("can't alloc CPPSymbol");
 	symbols->define(e, c);	// Add to current scope
 	if(statementTrace >= 2)
-		printf("%d support.cpp declaratorID declare %s in current scope %d, ObjectType %d\n",
+		OUTPUT_DEBUG("%d support.cpp declaratorID declare %s in current scope %d, ObjectType %d\n",
 			lineNo,e,symbols->getCurrentScopeIndex(),c->getType());
 	}
 
@@ -864,7 +864,7 @@ beginEnumDefinition(const char *e)
 	if (c==NULL) panic("can't alloc CPPSymbol");
 	symbols->defineInScope(e, c, externalScope);
 	if (statementTrace >= 2)
-		printf("%d support.cpp beginEnumDefinition %s define in external scope, ObjectType %d\n",
+		OUTPUT_DEBUG("%d support.cpp beginEnumDefinition %s define in external scope, ObjectType %d\n",
 			lineNo,e,c->getType());
 	}
 
@@ -887,10 +887,10 @@ templateTypeParameter(const char *t)
 	symbols->defineInScope(t, e, externalScope);
 //	symbols->define(t,e);	// Save template parameter in local scope
 	if (statementTrace >= 2)
-//		printf("%d support.cpp templateTypeParameter declare %s in  parameter scope (0), ObjectType %d\n",
-		printf("%d support.cpp templateTypeParameter declare %s in  external scope (1), ObjectType %d\n",
+//		OUTPUT_DEBUG("%d support.cpp templateTypeParameter declare %s in  parameter scope (0), ObjectType %d\n",
+		OUTPUT_DEBUG("%d support.cpp templateTypeParameter declare %s in  external scope (1), ObjectType %d\n",
 			lineNo,t,e->getType());
-//		printf("%d support.cpp templateTypeParameter declare %s in current scope %d, ObjectType %d\n",
+//		OUTPUT_DEBUG("%d support.cpp templateTypeParameter declare %s in current scope %d, ObjectType %d\n",
 //			lineNo,t,symbols->getCurrentScopeIndex(),e->getType());
 	}
 
@@ -898,7 +898,7 @@ void CPPParser::
 beginTemplateDeclaration()
 	{
 	symbols->saveScope();	// Advance currentScope (lower level)
-	//printf("Support beginTemplateDeclaration, Scope now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("Support beginTemplateDeclaration, Scope now %d\n",symbols->getCurrentScopeIndex());
 	}
 
 void CPPParser::
@@ -907,7 +907,7 @@ endTemplateDeclaration()
 	symbols->dumpScope(stdout);	// Diagnostic - See CPPDictionary.hpp
 	symbols->removeScope();		// Remove symbols stored in current scope
 	symbols->restoreScope();	// Reduce currentScope (higher level)
-	//printf("Support endTemplateDeclaration, Scope now %d\n",symbols->getCurrentScopeIndex());
+	//OUTPUT_DEBUG("Support endTemplateDeclaration, Scope now %d\n",symbols->getCurrentScopeIndex());
 	}
 
 void CPPParser::
@@ -957,7 +957,7 @@ end_of_stmt()
 void CPPParser::
 panic(const char *err)
 	{
-	fprintf(stdout, "CPPParser: %s\n", err);
+	OUTPUT_DEBUG("CPPParser: %s\n", err);
 	exit(-1);
 	}
 
@@ -981,6 +981,6 @@ myCode_end_of_stmt()
 void CPPParser::
 myCode_function_direct_declarator(const char *id)
 	{
-	//printf("support myCode_function_direct_declarator entered for %s\n",id);
+	//OUTPUT_DEBUG("support myCode_function_direct_declarator entered for %s\n",id);
 	}
 

@@ -1,4 +1,5 @@
 #include "PNode.hpp"
+#include <fstream>
 
 //////////////////////////////////////////////////////////////////////////
 //PNode
@@ -122,4 +123,34 @@ string PNode::getFilename() const
 			return ( (static_cast<RefPNode>(BaseAST::getFirstChild()))->getFilename());
 		}
 	}
+}
+
+void PNode::xmlSerialize(ofstream& fout)
+{
+ 	fout << "<" << text.c_str() << ">" << std::endl;
+ 	RefPNode pIt = getFirstChild();
+ 	while(pIt != NULL)
+ 	{
+ 		pIt->xmlSerialize(fout);
+ 		pIt = pIt->getNextSibling();
+ 	}
+ 	fout << "</" << text.c_str() << ">" << std::endl;
+}
+
+void CNamespaceNode::xmlSerialize(ofstream& fout)
+{
+	fout << "<" << text.c_str();
+	RefPNode pIt = getFirstChild();
+	if(pIt != NULL && !pIt->IsVirtual())
+	{
+		fout << " Name=\"" << pIt->getText() << "\" ";
+	}
+	fout << ">" << std::endl;
+	while(pIt != NULL)
+	{
+		pIt = pIt->getNextSibling();
+		if(pIt)
+			pIt->xmlSerialize(fout);
+	}
+	fout << "</" << text.c_str() << ">" << std::endl;
 }

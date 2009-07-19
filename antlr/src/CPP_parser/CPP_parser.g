@@ -420,7 +420,7 @@ external_declaration
 		// Template explicit specialisation
 		("template" LESSTHAN GREATERTHAN)=>
 		{if(statementTrace>=1) 
-			printf("%d external_declaration template explicit-specialisation\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration template explicit-specialisation\n",LT(1)->getLine());
 		}
 		"template" LESSTHAN GREATERTHAN external_declaration
 	|
@@ -429,26 +429,26 @@ external_declaration
 		(
 			("typedef" "enum")=>
 			{if(statementTrace>=1) 
-				printf("%d external_declaration Typedef enum type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Typedef enum type\n",LT(1)->getLine());
 			}
 			"typedef"! enum_specifier {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 			{#external_declaration = #(#[MYTYPEDEF, "typedef"], #external_declaration);}
 		|
 			(declaration_specifiers function_declarator[0] SEMICOLON)=>	// DW 11/02/05 This may not be possible
 			{if(statementTrace>=1) 
-				printf("%d external_declaration Typedef function type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Typedef function type\n",LT(1)->getLine());
 			}
 			function_declaration
 		|
 			(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 			{if(statementTrace>=1) 
-				printf("%d external_declaration Typedef variable type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Typedef variable type\n",LT(1)->getLine());
 			}
 			declaration
 		|
 			("typedef" class_specifier)=>
 			{if(statementTrace>=1) 
-				printf("%d external_declaration Typedef class type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Typedef class type\n",LT(1)->getLine());
 			}
 			"typedef"! class_decl_or_def[fs] {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 			{#external_declaration = #(#[MYTYPEDEF, "typedef"], #external_declaration);}
@@ -457,7 +457,7 @@ external_declaration
 		// Class template declaration or definition
 		(template_head (fs = function_specifier)* class_specifier)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Templated class decl or def\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Templated class decl or def\n",LT(1)->getLine());
 		}
 		template_head (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}	// declaration
 		{#external_declaration = #(#[MYTEMPLATE, "templatepro"], #external_declaration);}
@@ -465,7 +465,7 @@ external_declaration
 		// Enum definition (don't want to backtrack over this in other alts)
 		("enum" (ID)? LCURLY)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Enum definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Enum definition\n",LT(1)->getLine());
 		}
 		enum_specifier (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 		{#external_declaration = #(#[MYDECLAR, "declaration"], #external_declaration);}
@@ -473,7 +473,7 @@ external_declaration
 		// Destructor definition (templated or non-templated)
 		((template_head)? dtor_head[1] LCURLY)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Destructor definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Destructor definition\n",LT(1)->getLine());
 		}
 		(template_head)? dtor_definition
 		{#external_declaration = #(#[MYTEMPLATE, "templatepro"], #external_declaration);}
@@ -487,14 +487,14 @@ external_declaration
 			{qualifiedItemIsOneOf(qiCtor)}?
 		)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Constructor definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Constructor definition\n",LT(1)->getLine());
 		}
 		ctor_definition
 	|!  
 		// User-defined type cast
 		(("inline")? scope_override  conversion_function_decl_or_def)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Operator function\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Operator function\n",LT(1)->getLine());
 		}
 		(m:"inline")? s = sc:scope_override fc:conversion_function_decl_or_def 
 		{
@@ -509,21 +509,21 @@ external_declaration
 		// Function declaration
 		(declaration_specifiers function_declarator[0] SEMICOLON)=> 
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Function declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Function declaration\n",LT(1)->getLine());
 		}
 		function_declaration
 	|
 		// Function definition
 		(declaration_specifiers	function_declarator[1] LCURLY)=> 
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Function definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Function definition\n",LT(1)->getLine());
 		}
 		function_definition
 	|
 		// Function definition with int return assumed
 		(function_declarator[1] LCURLY)=> 
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Function definition without return type\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Function definition without return type\n",LT(1)->getLine());
 		}
 		function_definition
 	|
@@ -531,7 +531,7 @@ external_declaration
 		(declaration_specifiers	function_declarator[1] declaration)=>
 		{K_and_R = true;
 		 if (statementTrace>=1) 
-			printf("%d external_declaration K & R function definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration K & R function definition\n",LT(1)->getLine());
 		}
 		function_definition
 	|
@@ -539,14 +539,14 @@ external_declaration
 		(function_declarator[1] declaration)=>
 		{K_and_R = true;
 		 if (statementTrace>=1) 
-			printf("%d external_declaration K & R function definition without return type\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration K & R function definition without return type\n",LT(1)->getLine());
 		}
 		function_definition
 	|
 		// Class declaration or definition
 		(("extern")? (fs = function_specifier)* class_specifier)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Class decl or def\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Class decl or def\n",LT(1)->getLine());
 		}
 		("extern"!)? (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 		{#external_declaration = #(#[MYDECLAR, "declaration"], #external_declaration);}
@@ -554,7 +554,7 @@ external_declaration
 		// Copied from member_declaration 31/05/07
 		(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Declaration\n",LT(1)->getLine());
 		}
 		declaration
 	|  
@@ -565,21 +565,21 @@ external_declaration
 			// templated forward class decl, init/decl of static member in template
 			(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 			{if (statementTrace>=1) 
-				printf("%d external_declaration Templated class forward declaration\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Templated class forward declaration\n",LT(1)->getLine());
 			}
 			declaration
 		|  
 			// Templated function declaration
 			(declaration_specifiers function_declarator[0] SEMICOLON)=> 
 			{if (statementTrace>=1) 
-				printf("%d external_declaration Templated function declaration\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Templated function declaration\n",LT(1)->getLine());
 			}
 			function_declaration
 		|  
 			// Templated function definition
 			(declaration_specifiers function_declarator[1] LCURLY)=> 
 			{if (statementTrace>=1) 
-				printf("%d external_declaration Templated function definition\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Templated function definition\n",LT(1)->getLine());
 			}
 			function_definition
 		|
@@ -590,7 +590,7 @@ external_declaration
 				{qualifiedItemIsOneOf(qiCtor)}?
 			)=>
 			{if (statementTrace>=1) 
-				printf("%d external_declaration Templated constructor definition\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d external_declaration Templated constructor definition\n",LT(1)->getLine());
 			}
 			ctor_definition
 		)
@@ -599,19 +599,19 @@ external_declaration
 	|  
 		// Namespace definition
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Namespace definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Namespace definition\n",LT(1)->getLine());
 		}
 		"namespace"! namespace_definition
 	|	
 		// Semicolon
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Semicolon\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Semicolon\n",LT(1)->getLine());
 		}
 		SEMICOLON! {end_of_stmt();}
 	|	
 		// Anything else 
 		{if (statementTrace>=1) 
-			printf("%d external_declaration Other Declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d external_declaration Other Declaration\n",LT(1)->getLine());
 		}
 		declaration
 	|	
@@ -659,7 +659,7 @@ member_declaration
 		// Template explicit specialisation
 		("template" LESSTHAN GREATERTHAN)=>
 		{if(statementTrace>=1) 
-			printf("%d member_declaration Template explicit-specialisation\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Template explicit-specialisation\n",LT(1)->getLine());
 		}
 		"template" LESSTHAN GREATERTHAN member_declaration
 	|
@@ -668,26 +668,26 @@ member_declaration
 		(
 			("typedef" "enum")=>
 			{if(statementTrace>=1) 
-				printf("%d member_declaration Typedef enum type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Typedef enum type\n",LT(1)->getLine());
 			}
 			"typedef" enum_specifier {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 			{#member_declaration = #(#[MYTYPEDEF, "typedef"], #member_declaration);}
 		|
 			(declaration_specifiers function_declarator[0] SEMICOLON)=>	// DW 11/02/05 This may not be possible member declaration
 			{if(statementTrace>=1) 
-				printf("%d member_declaration Typedef function type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Typedef function type\n",LT(1)->getLine());
 			}
 			function_declaration
 		|
 			(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 			{if(statementTrace>=1) 
-				printf("%d member_declaration Typedef variable type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Typedef variable type\n",LT(1)->getLine());
 			}
 			declaration
 		|
 			("typedef" class_specifier)=>
 			{if(statementTrace>=1) 
-				printf("%d member_declaration Typedef class type\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Typedef class type\n",LT(1)->getLine());
 			}
 			"typedef" class_decl_or_def[fs] {_td = true;} (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 			{#member_declaration = #(#[MYTYPEDEF, "typedef"], #member_declaration);}
@@ -696,7 +696,7 @@ member_declaration
 		// Templated class declaration or definition
 		(template_head (fs = function_specifier)* class_specifier)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Templated class decl or def\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Templated class decl or def\n",LT(1)->getLine());
 		}
 		template_head (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}	// declaration
 		{#member_declaration = #(#[MYTEMPLATE, "templatepro"], #member_declaration);}
@@ -704,7 +704,7 @@ member_declaration
 		// Enum definition (don't want to backtrack over this in other alts)
 		("enum" (ID)? LCURLY)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Enum definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Enum definition\n",LT(1)->getLine());
 		}
 		enum_specifier (init_declarator_list)? SEMICOLON!	{end_of_stmt();}
 		{#member_declaration = #(#[MYDECLAR, "declaration"], #member_declaration);}
@@ -715,7 +715,7 @@ member_declaration
 			ctor_declarator[0] SEMICOLON!
 		)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Constructor declarator\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Constructor declarator\n",LT(1)->getLine());
 		}
 		ctor_decl_spec ctor_declarator[0] SEMICOLON! {end_of_stmt();}
 		{#member_declaration = #(#[MYFUNCTION, "ctor"], #member_declaration);}
@@ -733,7 +733,7 @@ member_declaration
 			)
 		)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Constructor definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Constructor definition\n",LT(1)->getLine());
 		}
 		ctor_definition 
 	|  
@@ -742,7 +742,7 @@ member_declaration
 		// Destructor declaration
 		(dtor_head[0] (ASSIGNEQUAL OCTALINT)? SEMICOLON)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Destructor declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Destructor declaration\n",LT(1)->getLine());
 		}
 		dtor_head[0] (ASSIGNEQUAL! OCTALINT!{astFactory->addASTChild(currentAST,#[MY, "pure"]);})? SEMICOLON! {end_of_stmt();}
 		{#member_declaration = #(#[MYFUNCTION, "dtor"], #member_declaration);}
@@ -752,7 +752,7 @@ member_declaration
 		// Destructor definition
 		(dtor_head[1] LCURLY!)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Destructor definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Destructor definition\n",LT(1)->getLine());
 		}
 		dtor_head[1] dtor_body
 		{#member_declaration = #(#[MYFUNCTION, "dtor"], #member_declaration);}
@@ -760,21 +760,21 @@ member_declaration
 		// Function declaration
 		(declaration_specifiers	function_declarator[0] SEMICOLON)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Function declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Function declaration\n",LT(1)->getLine());
 		}
 		function_declaration
 	|  
 		// Function definition
 		(declaration_specifiers function_declarator[1] LCURLY)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Function definition\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Function definition\n",LT(1)->getLine());
 		}
 		function_definition
 	|!  
 		// User-defined type cast
 		(("inline")? conversion_function_decl_or_def)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Operator function\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Operator function\n",LT(1)->getLine());
 		}
 		(m:"inline")? fc:conversion_function_decl_or_def
 		{
@@ -789,21 +789,21 @@ member_declaration
 		// Qualified identifier
 		(qualified_id SEMICOLON)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Qualified ID\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Qualified ID\n",LT(1)->getLine());
 		}
 		q = qualified_id SEMICOLON {end_of_stmt();}
 	|
 		// Class declaration or definition
 		(("friend")? (fs = function_specifier)* class_specifier)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Class decl or def\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Class decl or def\n",LT(1)->getLine());
 		}
 		("friend"!)? (fs = function_specifier)* class_decl_or_def[fs] (init_declarator_list)? SEMICOLON! {end_of_stmt();}
 		{#member_declaration = #(#[MYDECLAR, "declaration"], #member_declaration);}
 	|  
 		(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Declaration\n",LT(1)->getLine());
 		}
 		declaration
 	|  
@@ -811,7 +811,7 @@ member_declaration
 		((fs = function_specifier)* function_declarator[0] SEMICOLON)=>
 		{fprintf(stderr,"%d warning Function declaration found without return type\n",LT(1)->getLine());
 		 if (statementTrace>=1) 
-			printf("%d member_declaration Function declaration\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Function declaration\n",LT(1)->getLine());
 		}
 		(fs = function_specifier)* function_declarator[0] SEMICOLON! {end_of_stmt();}
 		{#member_declaration = #(#[MYFUNCTION, "function"], #member_declaration);}
@@ -820,7 +820,7 @@ member_declaration
 		((fs = function_specifier)* function_declarator[1] LCURLY)=>
 		{fprintf(stderr,"%d warning Function definition found without return type\n",LT(1)->getLine());
 		 if (statementTrace>=1) 
-			printf("%d member_declaration Function definition without return type\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Function definition without return type\n",LT(1)->getLine());
 		}
 		(fs = function_specifier)* function_declarator[1] compound_statement {endFunctionDefinition();}
 		{#member_declaration = #(#[MYFUNCTION, "function"], #member_declaration);}
@@ -832,21 +832,21 @@ member_declaration
 			// templated forward class decl, init/decl of static member in template
 			(declaration_specifiers (init_declarator_list)? SEMICOLON)=>
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated forward declaration\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated forward declaration\n",LT(1)->getLine());
 			}
 			declaration
 		|
 			// Templated function declaration
 			(declaration_specifiers function_declarator[0] SEMICOLON)=>
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated function declaration\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated function declaration\n",LT(1)->getLine());
 			}
 			function_declaration
 		|  
 			// Templated function definition
 			(declaration_specifiers function_declarator[1] LCURLY)=> 
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated function definition\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated function definition\n",LT(1)->getLine());
 			}
 			function_definition
 		|
@@ -856,7 +856,7 @@ member_declaration
 				ctor_declarator[0] SEMICOLON
 			)=>
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated constructor declarator\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated constructor declarator\n",LT(1)->getLine());
 			}
 			ctor_decl_spec ctor_declarator[0] SEMICOLON {end_of_stmt();}
 		|
@@ -866,13 +866,13 @@ member_declaration
 			(ctor_decl_spec {qualifiedItemIsOneOf(qiCtor)}?
 			)=>
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated constructor definition\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated constructor definition\n",LT(1)->getLine());
 			}
 			ctor_definition
 		|!
 			// Templated operator function
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated operator function\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated operator function\n",LT(1)->getLine());
 			}
 			(mt:"inline")? fct:conversion_function_decl_or_def
 			{
@@ -884,7 +884,7 @@ member_declaration
 		|
 			// Templated class definition
 			{if (statementTrace>=1) 
-				printf("%d member_declaration Templated class definition\n",LT(1)->getLine());
+				OUTPUT_DEBUG("%d member_declaration Templated class definition\n",LT(1)->getLine());
 			}
 			class_head declaration
 		)
@@ -893,13 +893,13 @@ member_declaration
 	|!
 		// Access specifier  
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Access specifier\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Access specifier\n",LT(1)->getLine());
 		}
 		access_specifier COLON
 	|
 		// Semicolon
 		{if (statementTrace>=1) 
-			printf("%d member_declaration Semicolon\n",LT(1)->getLine());
+			OUTPUT_DEBUG("%d member_declaration Semicolon\n",LT(1)->getLine());
 		}
 		SEMICOLON {end_of_stmt();}
 	|	
@@ -1590,7 +1590,7 @@ qualified_ctor_id returns [data q]
 		id:ID	// DW 24/05/04 Note. Neither Ctor or Dtor recorded in dictionary
 		{strcat(qitem03,(id->getText()).data());
 		q = qitem03;
-		//printf("CPP_parser.g qualified_ctor_id q %s\n",q);
+		//OUTPUT_DEBUG("CPP_parser.g qualified_ctor_id q %s\n",q);
 		} 
 	;
 
@@ -2056,7 +2056,7 @@ jump_statement
 				LPAREN! ID RPAREN! (expression)?	// This is an unsatisfactory fix for problem in xstring re "return (allocator);"
 												//  and in xlocale re return (_E)(_Tolower((unsigned char)_C, &_Ctype));
 												//	still can't go to here!
-				//{printf("%d CPP_parser.g jump_statement Return fix used\n",lineNo);}
+				//{OUTPUT_DEBUG("%d CPP_parser.g jump_statement Return fix used\n",lineNo);}
 			|	expression 
 			)?	SEMICOLON! {in_return = false,end_of_stmt();} 
 		)
@@ -2751,7 +2751,7 @@ void process_line_directive(const char *includedFile, const char *includedLineNo
 	// Extract included file line no.
 	result = sscanf(includedLineNo, "%d \n", &line);
 
-	//printf("CPPLexer line directive on line %d\n",lineNo);
+	//OUTPUT_DEBUG("CPPLexer line directive on line %d\n",lineNo);
 	// remove first " from file path+name by shifting all characters left
 	for(x=1;includedFile[x]!='"';x++)
 		{
@@ -2762,10 +2762,10 @@ void process_line_directive(const char *includedFile, const char *includedLineNo
 	if(x>128)
 		{
 		//
-		printf("Path and name of included file too long\n");
-		printf("Increase length of current_included_file and\n");
-		printf("  principal_file to at least %d characters\n",x);
-		printf("Abandon run\n");
+		OUTPUT_DEBUG("Path and name of included file too long\n");
+		OUTPUT_DEBUG("Increase length of current_included_file and\n");
+		OUTPUT_DEBUG("  principal_file to at least %d characters\n",x);
+		OUTPUT_DEBUG("Abandon run\n");
 		getchar();		    
 		}
 
@@ -2790,8 +2790,8 @@ void process_line_directive(const char *includedFile, const char *includedLineNo
 	else
 		// Check that this is a genuine path
 		if(current_included_file[1]==':')
-			{//printf("main.cpp 222 entered\n");
-			//printf("main.cpp 223 %s %s\n",principal_file,current_included_file);
+			{//OUTPUT_DEBUG("main.cpp 222 entered\n");
+			//OUTPUT_DEBUG("main.cpp 223 %s %s\n",principal_file,current_included_file);
 			include_line = line;	// this is line no. shown in line directive
 			include_last_set = CharScanner::getLine();	// This is line no. in preprocessed *.i file
 			in_user_file_deferred = false; // Header file file detected
@@ -2878,7 +2878,7 @@ Whitespace
 			(	'\\' '\r' '\n'	// MS
 			|	'\\' '\r'		// Mac
 			|	'\\' '\n'		// Unix 
-			)	{printf("CPP_parser.g continuation line detected on line %d\n",lineNo);
+			)	{OUTPUT_DEBUG("CPP_parser.g continuation line detected on line %d\n",lineNo);
 				deferredNewline();}
 		)	
 		{_ttype = ANTLR_USE_NAMESPACE(antlr)Token::SKIP;}
