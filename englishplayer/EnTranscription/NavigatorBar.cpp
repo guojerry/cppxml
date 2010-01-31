@@ -49,20 +49,21 @@ void CNavigatorBar::OnStatusChange()
 	}
 }
 
-void CNavigatorBar::OnUpdateSoundData(double eTime, float* eVal, char nType, int nRelEnergy)
+void CNavigatorBar::OnUpdateSoundData(double eTime, int nRelEnergy)
 {
-	if(m_pWaveBar)
-		m_pWaveBar->UpdateSoundData(eTime, eVal, nType);
-
-	if(nRelEnergy < 50)
-		m_nSilCount++;
-	else
-		m_nSilCount = 0;
-
-	double eSpeakTime = eTime - m_eDictationStartPos;
-	if(m_nSilCount > 10 && eSpeakTime > 2 && m_eDictationEndPos < 0.0001)
+	if(m_bDictation)
 	{
-		m_dBreakPoint = eTime;
+		if(nRelEnergy < 50)
+			m_nSilCount++;
+		else
+			m_nSilCount = 0;
+
+		double eSpeakTime = eTime - m_eDictationStartPos;
+		double eStandardEnergy = eSpeakTime * m_nSilCount * SAMPLE_INTERVAL;
+		if(eStandardEnergy > 800 && eSpeakTime > 2 && m_eDictationEndPos < 0.0001)
+		{
+			m_dBreakPoint = eTime;
+		}
 	}
 }
 
@@ -148,8 +149,6 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 
 	if(!m_pAudioDoc->IsPlaying())
 	{
-		if(m_pWaveBar)
-			m_pWaveBar->StartPlay(m_pAudioDoc->GetDuration());
 		m_pAudioDoc->Play();
 		m_pAudioDoc->SetPosition(0);
 		m_aSliderProgress.SetAPoint(0);
@@ -157,7 +156,9 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 		UpdateVolume();
 		UpdateUIStatus();
 		m_dBreakPoint = 0;
-		SetTimer(REFRESH_TIMER, 100, NULL);
+		m_eDictationStartPos = 0;
+		m_eDictationEndPos = 0;
+		SetTimer(REFRESH_TIMER, 20, NULL);
 	}
 	else
 		m_pAudioDoc->Pause();
@@ -196,13 +197,13 @@ void CNavigatorBar::UpdateUIStatus()
 	if(m_pAudioDoc == NULL)
 		return;
 
+	if(m_pWaveBar)
+		m_pWaveBar->Invalidate(FALSE);
+
 	BOOL bPaused = m_pAudioDoc->GetStatus() != 1;
 	CButton* pPlayBtn = (CButton*)GetDlgItem(IDC_BTN_PLAY);
 	if(pPlayBtn)
 		pPlayBtn->SetIcon(bPaused ? m_hPlayIcon : m_hPauseIcon);
-
-	if(m_pAudioDoc == NULL)
-		return;
 
 	REFTIME eDuration = m_pAudioDoc->GetDuration();
 	REFTIME eCurrent = m_pAudioDoc->GetPosition();
@@ -393,7 +394,7 @@ void CNavigatorBar::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	if(nChar == VK_ESCAPE && m_pWaveBar)
 	{
-		m_pWaveBar->EndDrag(FALSE);
+//		m_pWaveBar->EndDrag(FALSE);
 	}
 	else if(nChar == VK_F7 && m_bDictation && m_pAudioDoc)
 	{

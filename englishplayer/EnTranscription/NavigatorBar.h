@@ -24,7 +24,7 @@ public:
 	double GetCurrentPos();
 	void SetCurrentPos(double pos);
 	virtual void OnStatusChange();
-	virtual void OnUpdateSoundData(double eTime, float* eVal, char nType, int nRelEnergy);
+	virtual void OnUpdateSoundData(double eTime, int nRelEnergy);
 
 protected:
 	void UpdateUIStatus();

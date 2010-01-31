@@ -24,8 +24,8 @@ CMfcc::CMfcc(void)
 	m_fe->swap = 0;			//WORDS_LITTLEENDIAN
 	m_fe->window_length = float32(SAMPLE_INTERVAL*1.0 / 1000);
 	m_fe->pre_emphasis_alpha = float32(0.97);	//Pre emphasis alpha
-	m_fe->num_cepstra = 13;	//13 spectra components
-	m_fe->fft_size = 1024;	//For 10ms samples, it will be 441, fft size must greater than it.
+	m_fe->num_cepstra = MFCCVECTOR;	//13 spectra components
+	m_fe->fft_size = 512;	//For 10ms samples, it will be 441, fft size must greater than it.
 
 	/* Check FFT size, compute FFT order (log_2(n)) */
 	int j = m_fe->fft_size;

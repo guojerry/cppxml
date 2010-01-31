@@ -8,8 +8,9 @@
 
 void Msg(TCHAR *szFormat, ...);
 
-#define FREQBAND 12
-#define NBUFFER 20
+#define FREQBAND	12
+#define MFCCVECTOR	13
+#define NBUFFER		20
 
 #define SAMPLE_RATE			44100
 #define SAMPLE_INTERVAL		11.61							//It is a basic value, 25ms we can change it.
@@ -34,7 +35,7 @@ void Msg(TCHAR *szFormat, ...);
 #define SAFE_RELEASE(x) { if (x) x->Release(); x = NULL; }
 #define SAFE_DELETEARR(x) { if (x) delete [] x; x = NULL; }
 
-class CMfcc;
+class CAudioProcess;
 class IAudioDocSink
 {
 public:
@@ -42,7 +43,7 @@ public:
 
 public:
 	virtual void OnStatusChange() = 0;
-	virtual void OnUpdateSoundData(double eTime, float* eVal, char nType, int nRelEnergy) = 0;
+	virtual void OnUpdateSoundData(double eTime, int nRelEnergy) = 0;
 };
 
 class CAudioDoc : public ISampleGrabberCB
@@ -63,12 +64,12 @@ public:
     HRESULT Pause();
     HRESULT Stop();
 	HRESULT EndStream();
-	int GetStatus() {
-		if (m_bPause) return 2;
-		if (m_bPlaying) return 1;
-		return 0;
-	};
-    BOOL IsPlaying()const{return m_bPlaying;}
+	int GetStatus();
+	void GetDrawData(int eType, float* pData, int& nLen);
+    BOOL IsPlaying() const
+	{
+		return m_bPlaying;
+	}
     
 	// ISampleGrabberCB
 	STDMETHODIMP BufferCB(double SampleTime, BYTE *pBuffer, long BufferLen);
@@ -89,15 +90,21 @@ public:
 	void AnalyseThreadProc();
 	void MonitorThreadProc();
 
+	enum
+	{
+		eStatusStop = 0,
+		eStatusPlaying = 1,
+		eStatusPause = 2,
+	};
+	enum
+	{
+		eDrawWaveform,
+		eDrawSpectrum,
+		eDrawCepstrum
+	};
 protected:
 	IMediaEventEx *m_pME;
 	char* m_bufferIn[NBUFFER];
-	WORD* m_leftbuffer;
-	WORD* m_rightbuffer;
-	float* m_waveform;
-	float m_cep[32];
-	double m_eTotalEnergy;
-	long m_nTotalWindow;
 
 	HANDLE m_hSemphore;
 	int m_currentSampleBufferIndex;
@@ -108,16 +115,18 @@ protected:
 	IAudioDocSink* m_pSink;
 	CMutex m_Lock;
 
+	friend class CAudioProcess;
+	void UpdateEnergy(int nRelEnergy);
+
 private:
 	HRESULT StartCheckTread();
 
 	int m_bufferIndex;
-	double* m_spectrumData[2];
 	HANDLE m_hThread;
 	HANDLE m_hAnalyzeThread;
 
-    BOOL          m_bPause;
-    BOOL          m_bPlaying;
+    BOOL m_bPause;
+    BOOL m_bPlaying;
     
 	// DirectShow
 	IGraphBuilder *m_pGB;
@@ -126,10 +135,10 @@ private:
 	IMediaSeeking *m_pMS;
 	IMediaPosition *m_pMP;
 	IBaseFilter *m_pGrabberF;
-	CMfcc* m_mfcc;
 	ISampleGrabber *m_pGrabber;
 	DWORD g_dwGraphRegister;
 	REFTIME m_stopTime;
+	CAudioProcess* m_Processer;
 };
 
 #endif
