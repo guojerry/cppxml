@@ -190,6 +190,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AudioProcess.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\BmpSlider.cpp"
 				>
 			</File>
@@ -249,6 +253,10 @@
 			>
 			<File
 				RelativePath=".\AudioDoc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AudioProcess.h"
 				>
 			</File>
 			<File

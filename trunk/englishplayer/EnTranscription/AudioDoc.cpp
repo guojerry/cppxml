@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include <windows.h>
 #include <mmsystem.h>
-#include <math.h>
 #include <stdio.h>
 #include <dshow.h>
 #include "Qedit.h"
@@ -9,7 +8,7 @@
 #include <AtlConv.h>
 #include "DshowUtil.h"
 #include "AudioDoc.h"
-#include "Mfcc.h"
+#include "AudioProcess.h"
 
 #pragma comment(lib, "strmiids.lib")
 
@@ -22,9 +21,6 @@ DWORD WINAPI AnalyzeThreadProc(PVOID);
 
 CAudioDoc::CAudioDoc(IAudioDocSink* pSink)
 {
-	m_spectrumData[0] = new double[FREQBAND];
-	m_spectrumData[1] = new double[FREQBAND];
-
     m_bPlaying = FALSE;
 	m_bPause = FALSE;
 
@@ -43,23 +39,17 @@ CAudioDoc::CAudioDoc(IAudioDocSink* pSink)
 	m_pSink = pSink;
 	g_dwGraphRegister = 0;
 	m_stopTime = 0;
-	m_eTotalEnergy = 0;
-	m_nTotalWindow = 0;
+	m_Processer = new CAudioProcess(this);
 
 	for (int x = 0; x < NBUFFER; x++)
 		m_bufferIn[x] = 0;
-
-	m_mfcc = new CMfcc;
-	m_leftbuffer = NULL;
-	m_waveform = NULL;
-	m_rightbuffer = NULL;
 }
 
 CAudioDoc::~CAudioDoc()
 {
     CloseMap();
-	delete m_spectrumData[0];
-	delete m_spectrumData[1];
+	if(m_Processer)
+		delete m_Processer;
 }
 	
 HRESULT CAudioDoc::CloseMap()
@@ -85,10 +75,7 @@ HRESULT CAudioDoc::CloseMap()
 	SAFE_RELEASE(m_pME);
 	SAFE_RELEASE(m_pMC);
 	SAFE_RELEASE(m_pGB);
-	SAFE_DELETEARR(m_leftbuffer);
-	SAFE_DELETEARR(m_rightbuffer);
-	SAFE_DELETEARR(m_waveform);
-
+	
 	m_bufferIndex = 0;
 	m_currentSampleBufferIndex = 0;
 	m_currentSpectrumBufferIndex = 0;
@@ -183,19 +170,15 @@ HRESULT CAudioDoc::PrepareGrabber()
 	mt.cbFormat = sizeof(m_wfx);
 	mt.pbFormat = (BYTE *)&m_wfx;
 
+	if(m_Processer)
+		m_Processer->Init(m_wfx.nChannels);
+
 	// Set Media Type
 	JIF(m_pGrabber->SetMediaType(&mt));
 
 	for (int x = 0; x < NBUFFER; x++)
 		m_bufferIn[x] = new char[mt.lSampleSize];
 
-	SAFE_DELETEARR(m_leftbuffer);
-	SAFE_DELETEARR(m_rightbuffer);
-	m_leftbuffer = new WORD[FFT_LEN];
-	m_rightbuffer = new WORD[FFT_LEN];
-	m_waveform = new float[FFT_LEN];
-	m_eTotalEnergy = 0;
-	m_nTotalWindow = 0;
 	//FreeMediaType(mt);
 
 	IPin *inPin;
@@ -475,43 +458,21 @@ void CAudioDoc::AnalyseThreadProc()
 		m_Lock.Unlock();
 		m_currentSampleTime += SAMPLE_INTERVAL/1000.0;//wait;
 
-		// To Calculate MFCC
-		WORD* pBuffer = (WORD*)m_bufferIn[m_currentSpectrumBufferIndex];
-		double lEnergy = 0;
-		double eSum = 0;
-		double ftmp = 0;
-		for(int i = 0; i < PIXEL_PER_WINDOW; i++)
-		{
-			eSum = 0;
-			for(int j = 0; j < FFT_LEN / PIXEL_PER_WINDOW; j++, pBuffer+=2)
-			{
-				ftmp = short(*pBuffer);
-				if(ftmp > 0)
-					ftmp = log10(ftmp);
-				else if(ftmp < 0)
-					ftmp = - log10(-ftmp);
-				else
-					ftmp = 0;
-
-				lEnergy += ftmp * ftmp;
-				eSum += (30 + ftmp * 6);
-			}
-			m_waveform[i] = float(eSum * PIXEL_PER_WINDOW / FFT_LEN);
-		}
-		lEnergy /= FFT_LEN;
-		m_eTotalEnergy += lEnergy;
-		m_nTotalWindow++;
-		int nRelEnergy = int(lEnergy * m_nTotalWindow * 100 / m_eTotalEnergy);
-//		int16 nCep = m_mfcc->fe_process_frame((const int16*)m_leftbuffer, FFT_LEN, m_cep);
-//		nCep = m_mfcc->fe_process_frame((const int16*)m_rightbuffer, FFT_LEN, m_cep);
-		if(m_pSink)
-			m_pSink->OnUpdateSoundData(m_currentSampleTime, m_waveform, 0, nRelEnergy);
+		//Do process
+		if(m_Processer)
+			m_Processer->ProcessSample(m_bufferIn[m_currentSpectrumBufferIndex], FFT_LEN);
 
 		m_currentSpectrumBufferIndex++;
 		if (m_currentSpectrumBufferIndex >= NBUFFER)
 			m_currentSpectrumBufferIndex = 0;
 //		Msg(_T("AnalyzeThreadProc, current sample time=%f, value=%e\r\n"), p->m_currentSampleTime, lsum * 100 / 65536);
 	}
+}
+
+void CAudioDoc::UpdateEnergy(int nRelEnergy)
+{
+	if(m_pSink)
+		m_pSink->OnUpdateSoundData(m_currentSampleTime, nRelEnergy);
 }
 
 DWORD WINAPI AnalyzeThreadProc(PVOID param)
@@ -540,6 +501,26 @@ void CAudioDoc::MonitorThreadProc()
 	}
 }
 
+int CAudioDoc::GetStatus()
+{
+	if(m_bPause) 
+		return eStatusPause;
+	if(m_bPlaying) 
+		return eStatusPlaying;
+	return eStatusStop;
+}
+
+void CAudioDoc::GetDrawData(int eType, float* pData, int& nLen)
+{
+	if(m_Processer != NULL)
+		m_Processer->GetDrawData(eType, pData, nLen);
+	else
+		ASSERT(FALSE);
+}
+
+//////////////////////////////////////////////////////////////////////////
+//Thread Proc
+//////////////////////////////////////////////////////////////////////////
 DWORD WINAPI ThreadProc(PVOID param)
 {
     CAudioDoc * p = (CAudioDoc*)param;
