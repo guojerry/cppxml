@@ -141,7 +141,7 @@ void CWaveGraph::SetVisible(BOOL bVis)
 {
 	m_bVisible = bVis;
 }
-
+#include <math.h>
 void CWaveGraph::DrawWaveform(CDC* pDC, float* pDataIn, int nLen)
 {
 	if(!m_bVisible || pDC == NULL || pDataIn == NULL || nLen == 0)
@@ -150,11 +150,10 @@ void CWaveGraph::DrawWaveform(CDC* pDC, float* pDataIn, int nLen)
 	RECT rect;
 	m_pParent->GetClientRect(&rect);
 
-	float nScaleX = (rect.right - rect.left) * 1.0 / nLen;
-	float nScaleY = (rect.bottom - rect.top) / 10.0;	//Waveform value is between -5 ~ 5
+	float nScaleY = (rect.bottom - rect.top) / 32768.0;
 	int nMiddle = (rect.bottom + rect.top) / 2;
 
-	HPEN hGreen = CreatePen(PS_SOLID, 1, RGB_GREEN);
+	HPEN hGreen = CreatePen(PS_SOLID, 2, RGB_GREEN);
 	HPEN hOld = (HPEN)pDC->SelectObject(hGreen);
 	int nY = int(nMiddle + pDataIn[0] * nScaleY);
 	pDC->MoveTo(rect.left, nY);
@@ -163,7 +162,7 @@ void CWaveGraph::DrawWaveform(CDC* pDC, float* pDataIn, int nLen)
 	for(i = 0; i < nLen; i++)
 	{
 		nY = int(nMiddle + pDataIn[i] * nScaleY);
-		pDC->LineTo(rect.left + int(i * nScaleX), nY);
+		pDC->LineTo(rect.left + i, nY);
 	}
 	pDC->SelectObject(hOld);
 }

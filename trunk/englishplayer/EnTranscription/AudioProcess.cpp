@@ -48,12 +48,6 @@ void CAudioProcess::ProcessSample(char* pDataIn, DWORD dwSampleCounts)
 		for(j = 0; j < 1/*m_nChannels*/; j++)
 		{
 			ftmp = m_buffer[j][i];// - m_eMeans[j];
-			if(ftmp > 0)
-				ftmp = log10(ftmp);
-			else if(ftmp < 0)
-				ftmp = -log10(-ftmp);
-			else
-				ftmp = 0;
 			lEnergy += ftmp * ftmp;
 			m_waveform[nBase + j][i] = float(ftmp);
 		}
