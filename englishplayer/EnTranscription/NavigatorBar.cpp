@@ -53,7 +53,7 @@ void CNavigatorBar::OnUpdateSoundData(double eTime, int nRelEnergy)
 {
 	if(m_bDictation)
 	{
-		if(nRelEnergy < 50)
+		if(nRelEnergy < 20)
 			m_nSilCount++;
 		else
 			m_nSilCount = 0;
@@ -158,7 +158,7 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 		m_dBreakPoint = 0;
 		m_eDictationStartPos = 0;
 		m_eDictationEndPos = 0;
-		SetTimer(REFRESH_TIMER, 20, NULL);
+		SetTimer(REFRESH_TIMER, 12, NULL);
 	}
 	else
 		m_pAudioDoc->Pause();
@@ -197,7 +197,7 @@ void CNavigatorBar::UpdateUIStatus()
 	if(m_pAudioDoc == NULL)
 		return;
 
-	if(m_pWaveBar)
+	if(m_pWaveBar && m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPlaying)
 		m_pWaveBar->Invalidate(FALSE);
 
 	BOOL bPaused = m_pAudioDoc->GetStatus() != 1;
