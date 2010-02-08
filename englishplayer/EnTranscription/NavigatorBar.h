@@ -58,4 +58,7 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnBnClickedCheckTrans();
+	afx_msg void OnBnClickedBtnContinue();
+	afx_msg void OnBnClickedBtnRepeat();
+	afx_msg void OnBnClickedBtnSlowrepeat();
 };

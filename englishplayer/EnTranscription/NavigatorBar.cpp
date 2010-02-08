@@ -105,6 +105,7 @@ LRESULT CNavigatorBar::OnInitDialog(UINT wParam,LONG lParam)
 	GetClientRect(&rect);
 	rect.top += 1;		//Margin
 	rect.bottom = rect.top + 60;
+	rect.right = rect.left + 512;
 	m_pWaveBar->Create(NULL, NULL, WS_CHILD|WS_VISIBLE, rect, this, IDW_WAVEBAR, NULL);
 
 	if(!UpdateData(FALSE))
@@ -140,6 +141,9 @@ BEGIN_MESSAGE_MAP(CNavigatorBar, CDialogBar)
 	ON_WM_SIZE()
 ON_WM_KEYDOWN()
 ON_BN_CLICKED(IDC_CHECK_TRANS, &CNavigatorBar::OnBnClickedCheckTrans)
+ON_BN_CLICKED(IDC_BTN_CONTINUE, &CNavigatorBar::OnBnClickedBtnContinue)
+ON_BN_CLICKED(IDC_BTN_REPEAT, &CNavigatorBar::OnBnClickedBtnRepeat)
+ON_BN_CLICKED(IDC_BTN_SLOWREPEAT, &CNavigatorBar::OnBnClickedBtnSlowrepeat)
 END_MESSAGE_MAP()
 
 void CNavigatorBar::OnBnClickedBtnPlay()
@@ -149,19 +153,24 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 
 	if(!m_pAudioDoc->IsPlaying())
 	{
+		m_dBreakPoint = 0;
+		m_eDictationStartPos = 0;
+		m_eDictationEndPos = 0;
 		m_pAudioDoc->Play();
-		m_pAudioDoc->SetPosition(0);
 		m_aSliderProgress.SetAPoint(0);
 		m_aSliderProgress.SetBPoint(0);
 		UpdateVolume();
 		UpdateUIStatus();
-		m_dBreakPoint = 0;
-		m_eDictationStartPos = 0;
-		m_eDictationEndPos = 0;
+		Sleep(0);
+		m_pAudioDoc->SetPosition(0);
 		SetTimer(REFRESH_TIMER, 12, NULL);
 	}
 	else
 		m_pAudioDoc->Pause();
+
+	if(m_pAudioDoc)
+		m_pAudioDoc->SetRate(0);
+
 	UpdateUIStatus();
 }
 
@@ -307,6 +316,7 @@ void CNavigatorBar::OnDestroy()
 
 void CNavigatorBar::OnSize(UINT nType, int cx, int cy)
 {
+/*
 	if(m_pWaveBar)
 	{
 		RECT rc = {0};
@@ -317,6 +327,7 @@ void CNavigatorBar::OnSize(UINT nType, int cx, int cy)
 			m_pWaveBar->MoveWindow(&rc, TRUE);
 		}
 	}
+*/
 	CDialogBar::OnSize(nType, cx, cy);
 }
 
@@ -396,13 +407,17 @@ void CNavigatorBar::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 //		m_pWaveBar->EndDrag(FALSE);
 	}
-	else if(nChar == VK_F7 && m_bDictation && m_pAudioDoc)
+	else if(nChar == VK_F7 && m_bDictation)
 	{
-		SetRepeatA();
+		OnBnClickedBtnContinue();
 	}
-	else if(nChar == VK_F8 && m_bDictation && m_pAudioDoc)
+	else if(nChar == VK_F8 && m_bDictation)
 	{
-		SetRepeatB();
+		OnBnClickedBtnRepeat();
+	}
+	else if(nChar == VK_F9)
+	{
+		OnBnClickedBtnSlowrepeat();
 	}
 	CDialogBar::OnKeyDown(nChar, nRepCnt, nFlags);
 }
@@ -420,4 +435,25 @@ void CNavigatorBar::OnSliderChanged()
 	int nPos = m_aSliderProgress.GetPos();
 	double eSetVal = nPos * m_pAudioDoc->GetDuration() / SLIDER_RANGE_MAX;
 	SetCurrentPos(eSetVal);
+}
+
+void CNavigatorBar::OnBnClickedBtnContinue()
+{
+	if(m_pAudioDoc)
+		m_pAudioDoc->SetRate(0);
+	SetRepeatA();
+}
+
+void CNavigatorBar::OnBnClickedBtnRepeat()
+{
+	if(m_pAudioDoc)
+		m_pAudioDoc->SetRate(0);
+	SetRepeatB();
+}
+
+void CNavigatorBar::OnBnClickedBtnSlowrepeat()
+{
+	if(m_pAudioDoc)
+		m_pAudioDoc->SetRate(-30);
+	SetRepeatB();
 }
