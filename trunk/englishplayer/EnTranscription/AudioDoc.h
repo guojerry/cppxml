@@ -36,6 +36,7 @@ void Msg(TCHAR *szFormat, ...);
 #define SAFE_DELETEARR(x) { if (x) delete [] x; x = NULL; }
 
 class CAudioProcess;
+class CAudioTimeScale;
 class IAudioDocSink
 {
 public:
@@ -65,6 +66,7 @@ public:
     HRESULT Stop();
 	HRESULT EndStream();
 	int GetStatus();
+	void SetRate(float rate);
 	void GetDrawData(int eType, float* pData, int& nLen);
     BOOL IsPlaying() const
 	{
@@ -139,6 +141,7 @@ private:
 	DWORD g_dwGraphRegister;
 	REFTIME m_stopTime;
 	CAudioProcess* m_Processer;
+	CAudioTimeScale* m_pTimeScale;
 };
 
 #endif

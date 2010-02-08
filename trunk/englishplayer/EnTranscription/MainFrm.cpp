@@ -124,6 +124,11 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			if(m_wndNavigator.SendMessage(WM_KEYDOWN, VK_F8, 0))
 				return TRUE;
 		}
+		else if(pMsg->wParam == VK_F9)
+		{
+			if(m_wndNavigator.SendMessage(WM_KEYDOWN, VK_F9, 0))
+				return TRUE;
+		}
 	}
 
 	return CFrameWnd::PreTranslateMessage(pMsg);

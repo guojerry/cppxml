@@ -150,7 +150,7 @@ void CWaveGraph::DrawWaveform(CDC* pDC, float* pDataIn, int nLen)
 	RECT rect;
 	m_pParent->GetClientRect(&rect);
 
-	float nScaleY = (rect.bottom - rect.top) / 32768.0;
+	double nScaleY = (rect.bottom - rect.top) / 32768.0;
 	int nMiddle = (rect.bottom + rect.top) / 2;
 
 	HPEN hGreen = CreatePen(PS_SOLID, 2, RGB_GREEN);

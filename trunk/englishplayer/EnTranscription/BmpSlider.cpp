@@ -148,6 +148,9 @@ BOOL CBmpSlider::NotifyPos(CPoint point)
 
 void CBmpSlider::OnLButtonUp(UINT nFlags, CPoint point)
 {
+	if(!m_bSlidering)
+		return;
+
 	ReleaseCapture();
 	
 	Invalidate();

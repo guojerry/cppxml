@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="EnTranscription"
+	Name="EnglishPlayer"
 	ProjectGUID="{A7CE82CA-25B6-44D2-801A-7D956AEA456B}"
 	RootNamespace="EnTranscription"
 	Keyword="MFCProj"
@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\bin\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\intermedia\$(ConfigurationName)\EnglishPlayer"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			CharacterSet="1"
@@ -45,7 +45,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
+				AdditionalIncludeDirectories="$(SolutionDir)\include;$(SolutionDir)\BaseClasses"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;INTEGER_SAMPLES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -67,7 +68,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="Winmm.lib strmbased.lib soundtouchd.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -96,8 +100,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\bin\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\intermedia\$(ConfigurationName)\EnglishPlayer"
 			ConfigurationType="1"
 			UseOfMFC="2"
 			CharacterSet="1"
@@ -125,7 +129,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)baseclasses&quot;"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;INTEGER_SAMPLES"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -147,7 +152,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="Winmm.lib strmbase.lib soundtouch.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(SolutionDir)lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -191,6 +199,10 @@
 			</File>
 			<File
 				RelativePath=".\AudioProcess.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AudioTimeScale.cpp"
 				>
 			</File>
 			<File
@@ -257,6 +269,10 @@
 			</File>
 			<File
 				RelativePath=".\AudioProcess.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AudioTimeScale.h"
 				>
 			</File>
 			<File

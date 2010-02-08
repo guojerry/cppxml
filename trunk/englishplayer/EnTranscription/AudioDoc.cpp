@@ -1,14 +1,14 @@
 #include "stdafx.h"
-#include <windows.h>
-#include <mmsystem.h>
+
+#include "streams.h"
 #include <stdio.h>
 #include <dshow.h>
-#include "Qedit.h"
 #include <strsafe.h>
 #include <AtlConv.h>
 #include "DshowUtil.h"
 #include "AudioDoc.h"
 #include "AudioProcess.h"
+#include "AudioTimeScale.h"
 
 #pragma comment(lib, "strmiids.lib")
 
@@ -34,6 +34,7 @@ CAudioDoc::CAudioDoc(IAudioDocSink* pSink)
 	m_pBA = 0;
 	m_pMS = 0;
 	m_pMP = 0;
+	m_pTimeScale = NULL;
 	m_pGrabberF = 0;	
 	m_pGrabber = 0;
 	m_pSink = pSink;
@@ -75,6 +76,7 @@ HRESULT CAudioDoc::CloseMap()
 	SAFE_RELEASE(m_pME);
 	SAFE_RELEASE(m_pMC);
 	SAFE_RELEASE(m_pGB);
+	SAFE_RELEASE(m_pTimeScale);
 	
 	m_bufferIndex = 0;
 	m_currentSampleBufferIndex = 0;
@@ -144,7 +146,7 @@ HRESULT CAudioDoc::PrepareGrabber()
 {	
 	// Query Sample Grabber interface
 	HRESULT hr;
-	m_pGrabberF->QueryInterface(IID_ISampleGrabber, (void**)&m_pGrabber);	
+	JIF(m_pGrabberF->QueryInterface(IID_ISampleGrabber, (void**)&m_pGrabber));
 
 	// Prepare media type for PCM WAV
 	AM_MEDIA_TYPE mt;
@@ -189,12 +191,25 @@ HRESULT CAudioDoc::PrepareGrabber()
 	FindFilterRenderer(m_pGB, &renderer);
 	FindPinByIndex(renderer, PINDIR_INPUT, 0, &inPin);
 	GetConnectedFilter(inPin, &source);
-	// Insert the Grabber Filter before the render
 	DisconnectPin(m_pGB, inPin);
-	ConnectFilters(m_pGB, source, m_pGrabberF);
+
+	m_pTimeScale = CAudioTimeScale::CreateInstance(NULL, &hr);
+	JIF(hr);
+	m_pTimeScale->AddRef();
+	JIF(m_pGB->AddFilter(m_pTimeScale, L"TimeScale"));
+
+	// Insert the Grabber Filter before the render
+	ConnectFilters(m_pGB, source, m_pTimeScale);
+	ConnectFilters(m_pGB, m_pTimeScale, m_pGrabberF);
 	ConnectFilters(m_pGB, m_pGrabberF, renderer);
 
 	return S_OK;
+}
+
+void CAudioDoc::SetRate(float rate)
+{
+	if(m_pTimeScale)
+		m_pTimeScale->SetRate(rate);
 }
 
 /*******************************************************************************
@@ -218,6 +233,7 @@ HRESULT CAudioDoc::Play()
 
 	// Run the graph to play the media file
     JIF(m_pMC->Run());
+
     m_bPlaying = TRUE;
 
 	StartCheckTread();
