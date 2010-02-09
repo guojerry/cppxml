@@ -1,8 +1,21 @@
 #pragma once
 
+#define _CSTDIO_
+#define _CSTRING_
+#define _CWCHAR_
+
 #include "AudioDoc.h"
 #include "BmpSlider.h"
+#include <deque>
 
+typedef struct tagBreakPoint
+{
+	double ePos;
+	int nEnergy;
+	int nEnergyRank;
+}BreakPoint;
+
+typedef std::deque<BreakPoint> BREAKPOINTLST;
 class CWaveBar;
 // CNavigatorBar Dialog
 class CNavigatorBar : public CDialogBar, public IAudioDocSink
@@ -31,6 +44,7 @@ protected:
 	void UpdateVolume();
 	void SetRepeatA();
 	void SetRepeatB();
+	void RepeatRecent();
 
 	HICON m_hPlayIcon;
 	HICON m_hPauseIcon;
@@ -45,6 +59,8 @@ protected:
 	CBmpSlider m_aSliderProgress;
 	BOOL m_nSilCount;
 	double m_dBreakPoint;
+	BREAKPOINTLST m_lBreakPoints;
+	BOOL m_bIsPlayIcon;
 
 public:
 	afx_msg void OnBnClickedBtnPlay();
