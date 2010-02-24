@@ -52,8 +52,9 @@ void CNavigatorBar::OnStatusChange()
 	if(!m_pAudioDoc)
 		return;
 	int nStatus = m_pAudioDoc->GetStatus();
-	if(nStatus == 0)
+	if(nStatus == CAudioDoc::eStatusStop)
 	{
+		m_pAudioDoc->Stop();
 		KillTimer(REFRESH_TIMER);
 		UpdateUIStatus();
 	}
@@ -178,6 +179,7 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 	{
 		m_lBreakPoints.clear();
 		m_dBreakPoint = 0;
+		m_bIsPlayIcon = FALSE;
 		m_eDictationStartPos = 0;
 		m_eDictationEndPos = 0;
 		m_pAudioDoc->Play();
@@ -217,6 +219,9 @@ void CNavigatorBar::OnBnClickedBtnOpen()
 
 		if(m_pAudioDoc)
 		{
+			if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
+				m_pAudioDoc->Stop();
+
 			HRESULT hr = m_pAudioDoc->MapFile(sFilePath);
 			if(SUCCEEDED(hr))
 				OnBnClickedBtnPlay();
@@ -242,13 +247,13 @@ void CNavigatorBar::UpdateUIStatus()
 	if(m_pWaveBar && m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPlaying)
 		m_pWaveBar->Invalidate(FALSE);
 
-	BOOL bPaused = (m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause);
+	BOOL bPaused = (m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause || m_pAudioDoc->GetStatus() == CAudioDoc::eStatusStop);
 	if(bPaused == m_bIsPlayIcon)
 	{
 		m_bIsPlayIcon = !bPaused;
 		CButton* pPlayBtn = (CButton*)GetDlgItem(IDC_BTN_PLAY);
 		if(pPlayBtn)
-			pPlayBtn->SetIcon(bPaused ? m_hPauseIcon : m_hPlayIcon);
+			pPlayBtn->SetIcon(bPaused ? m_hPlayIcon : m_hPauseIcon);
 	}
 
 	REFTIME eDuration = m_pAudioDoc->GetDuration();

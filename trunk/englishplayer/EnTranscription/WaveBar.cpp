@@ -45,21 +45,23 @@ END_MESSAGE_MAP()
 
 BOOL CWaveBar::OnEraseBkgnd(CDC* pDC)
 {
-	if(m_hBackgroundBitmap != NULL)
+	if(m_hBackgroundBitmap != NULL && pDC != NULL)
 	{
 		CRect r;
 		GetClientRect(&r);
 
 		CDC dcBmp;
 		dcBmp.CreateCompatibleDC(pDC);
-		dcBmp.SelectObject(m_hBackgroundBitmap);
+		HGDIOBJ hOld = dcBmp.SelectObject(m_hBackgroundBitmap);
 
-		BITMAP bm; 
+		BITMAP bm;
 		GetObject(m_hBackgroundBitmap, sizeof(BITMAP), (PSTR)&bm); 
 		int bx=bm.bmWidth;
 		int by=bm.bmHeight;
 
 		pDC->StretchBlt(r.left, r.top, r.right, r.bottom, &dcBmp, 0, 0, bx, by, SRCCOPY);
+
+		dcBmp.SelectObject(hOld);
 	}
 	return CWnd::OnEraseBkgnd(pDC);
 }
@@ -131,17 +133,20 @@ CWaveGraph::CWaveGraph(CWaveBar* pParent)
 :m_pParent(pParent)
 {
 	m_bVisible = TRUE;
+	m_hLinePen = CreatePen(PS_SOLID, 2, RGB_GREEN);
 }
 
 CWaveGraph::~CWaveGraph()
 {
+	if(m_hLinePen != NULL)
+		DeleteObject(m_hLinePen);
 }
 
 void CWaveGraph::SetVisible(BOOL bVis)
 {
 	m_bVisible = bVis;
 }
-#include <math.h>
+
 void CWaveGraph::DrawWaveform(CDC* pDC, float* pDataIn, int nLen)
 {
 	if(!m_bVisible || pDC == NULL || pDataIn == NULL || nLen == 0)
@@ -153,8 +158,7 @@ void CWaveGraph::DrawWaveform(CDC* pDC, float* pDataIn, int nLen)
 	double nScaleY = (rect.bottom - rect.top) / 32768.0;
 	int nMiddle = (rect.bottom + rect.top) / 2;
 
-	HPEN hGreen = CreatePen(PS_SOLID, 2, RGB_GREEN);
-	HPEN hOld = (HPEN)pDC->SelectObject(hGreen);
+	HPEN hOld = (HPEN)pDC->SelectObject(m_hLinePen);
 	int nY = int(nMiddle + pDataIn[0] * nScaleY);
 	pDC->MoveTo(rect.left, nY);
 

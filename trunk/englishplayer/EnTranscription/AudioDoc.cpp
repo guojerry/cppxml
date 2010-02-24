@@ -325,6 +325,7 @@ HRESULT CAudioDoc::Stop()
 	m_currentSampleBufferIndex = 0;
 	m_currentSpectrumBufferIndex = 0;
 	m_currentSampleTime = 0;
+	m_bPause = FALSE;
 
 	return S_OK;
 }
