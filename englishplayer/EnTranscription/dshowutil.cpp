@@ -680,6 +680,11 @@ HRESULT FindFilterRenderer(
 		BOOL r;
         hr = IsRenderer(pFilter, &r);
 
+//		FILTER_INFO filterInfo = {0};
+//		pFilter->QueryFilterInfo(&filterInfo);
+//		OutputDebugStringW(filterInfo.achName);
+//		OutputDebugStringW(L"\r\n");
+
         if (SUCCEEDED(hr) && r)
         {
             bFound = true;

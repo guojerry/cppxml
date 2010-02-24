@@ -58,4 +58,5 @@ public:
 private:
 	BOOL m_bVisible;
 	CWaveBar* m_pParent;
+	HPEN m_hLinePen;
 };

@@ -284,13 +284,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "CompanyName", "Bayou Studio"
+            VALUE "FileDescription", "Bayou English Player"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "EnTranscription.exe"
-            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "InternalName", "English Player"
+            VALUE "LegalCopyright", "(c) Bayou Studio.  All rights reserved."
             VALUE "OriginalFilename", "EnTranscription.exe"
-            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductName", "English Player"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
