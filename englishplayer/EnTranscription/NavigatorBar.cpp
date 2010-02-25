@@ -11,6 +11,7 @@
 
 #define REFRESH_TIMER			1
 #define SLIDER_RANGE_MAX		100000
+#define CONTINUE_REPEATTIME		0.4
 #undef SubclassWindow
 
 // CNavigatorBar Dialog
@@ -401,7 +402,7 @@ void CNavigatorBar::SetRepeatA()
 	if(NULL == m_pAudioDoc)
 		return;
 
-	m_eDictationStartPos = GetCurrentPos() - 0.4;
+	m_eDictationStartPos = GetCurrentPos() - CONTINUE_REPEATTIME;
 	if(m_pAudioDoc->GetStatus() == 2)
 	{
 		m_pAudioDoc->Pause();
@@ -486,14 +487,18 @@ void CNavigatorBar::OnBnClickedBtnContinue()
 		SetRepeatA();
 	else
 	{
-		if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause && m_eDictationEndPos > 0)
+		if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
 		{
-			m_eDictationEndPos = 0;
-			m_eDictationStartPos = 0;
-			m_aSliderProgress.SetAPoint(0);
-			m_aSliderProgress.SetBPoint(0);
+			if(m_eDictationEndPos > 0)
+			{
+				m_pAudioDoc->SetPosition(m_eDictationEndPos - CONTINUE_REPEATTIME);
+				m_eDictationEndPos = 0;
+				m_eDictationStartPos = 0;
+				m_aSliderProgress.SetAPoint(0);
+				m_aSliderProgress.SetBPoint(0);
+			}
+			m_pAudioDoc->Pause();
 		}
-		m_pAudioDoc->Pause();
 	}
 }
 
@@ -519,7 +524,11 @@ void CNavigatorBar::RepeatRecent()
 	if(itFind == m_lBreakPoints.end())
 		aDest.ePos = eCurrPos - 5;
 	else
+	{
 		aDest = *itFind;
+		if(eCurrPos - aDest.ePos < 6)
+			aDest.ePos = eCurrPos - 6;
+	}
 
 	m_eDictationStartPos = aDest.ePos - 0.4;
 	if(m_eDictationStartPos  < 0)
