@@ -465,6 +465,14 @@ void CNavigatorBar::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 void CNavigatorBar::OnBnClickedCheckTrans()
 {
 	m_bDictation = !m_bDictation;
+	if(!m_bDictation)
+	{
+		m_eDictationEndPos = 0;
+		m_eDictationStartPos = 0;
+		m_aSliderProgress.SetAPoint(0);
+		m_aSliderProgress.SetBPoint(0);
+		m_dBreakPoint = 0;
+	}
 }
 
 void CNavigatorBar::OnSliderChanged()
