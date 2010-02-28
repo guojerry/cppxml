@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "EnTranscription.h"
-
+#include "MainFrm.h"
 #include "EnTranscriptionDoc.h"
 
 #ifdef _DEBUG
@@ -44,7 +44,13 @@ BOOL CEnTranscriptionDoc::OnNewDocument()
 	return TRUE;
 }
 
-
+BOOL CEnTranscriptionDoc::OnOpenDocument(LPCTSTR lpszPathName)
+{
+	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
+	if(pFrame)
+		return pFrame->OpenMediaFile(lpszPathName);
+	return FALSE;
+}
 
 
 // CEnTranscriptionDoc serialization

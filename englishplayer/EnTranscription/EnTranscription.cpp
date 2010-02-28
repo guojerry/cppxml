@@ -18,10 +18,8 @@
 BEGIN_MESSAGE_MAP(CEnTranscriptionApp, CWinApp)
 	ON_COMMAND(ID_APP_ABOUT, &CEnTranscriptionApp::OnAppAbout)
 	// Standard file based document commands
-	ON_COMMAND(ID_FILE_NEW, &CWinApp::OnFileNew)
 	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
 	// Standard print setup command
-	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinApp::OnFilePrintSetup)
 END_MESSAGE_MAP()
 
 
@@ -98,7 +96,6 @@ BOOL CEnTranscriptionApp::InitInstance()
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);
 
-
 	// Dispatch commands specified on the command line.  Will return FALSE if
 	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
 	if (!ProcessShellCommand(cmdInfo))
@@ -155,4 +152,3 @@ void CEnTranscriptionApp::OnAppAbout()
 
 
 // CEnTranscriptionApp message handlers
-
