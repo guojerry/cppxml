@@ -39,6 +39,8 @@ CNavigatorBar::CNavigatorBar(CWnd* pParent /*=NULL*/)
 	m_nSilCount = 0;
 	m_dBreakPoint = 0;
 	m_bIsPlayIcon = TRUE;
+	m_dwDictationStartTime = 0;
+	m_eLastBreakPointTime = 0;
 }
 
 CNavigatorBar::~CNavigatorBar()
@@ -63,30 +65,38 @@ void CNavigatorBar::OnStatusChange()
 
 void CNavigatorBar::OnUpdateSoundData(double eTime, int nRelEnergy)
 {
-	if(m_bDictation)
+	if(nRelEnergy < 2)
 	{
-		if(nRelEnergy < 20)
-			m_nSilCount++;
-		else
-			m_nSilCount = 0;
-
-		double eSpeakTime = eTime - m_eDictationStartPos;
-		double eStandardEnergy = eSpeakTime * m_nSilCount * SAMPLE_INTERVAL;
-		if(eStandardEnergy > 800 && eSpeakTime > 2 && m_eDictationEndPos < 0.0001)
-		{
-			if(m_bDictation)
-				m_dBreakPoint = eTime;
-			else
-			{
-				BreakPoint aBreakPoint;
-				aBreakPoint.ePos = eTime;
-				aBreakPoint.nEnergy = nRelEnergy;
-				aBreakPoint.nEnergyRank = m_nSilCount;
-				BREAKPOINTLST::iterator itLow = std::upper_bound(m_lBreakPoints.begin(), m_lBreakPoints.end(), aBreakPoint);
-				m_lBreakPoints.insert(itLow, aBreakPoint);
-			}
-		}
+		m_nSilCount++;
+		return;
 	}
+
+	double eSpeakTime = eTime - m_eLastBreakPointTime;
+	double eStandardEnergy = eSpeakTime * m_nSilCount * SAMPLE_INTERVAL;
+	if(eStandardEnergy > 800 && eSpeakTime > 3 && m_eDictationEndPos < 0.0001)
+	{
+		TRACE("CNavigatorBar::OnUpdateSoundData, break point, eTime=%e, standard energy=%e, \r\n", eTime, eStandardEnergy);
+		if(m_bDictation)
+			m_dBreakPoint = eTime;
+
+		m_eLastBreakPointTime = eTime;
+		BreakPoint aBreakPoint;
+		aBreakPoint.ePos = eTime;
+		aBreakPoint.nEnergy = nRelEnergy;
+		aBreakPoint.nEnergyRank = m_nSilCount;
+		BREAKPOINTLST::iterator itLow = std::lower_bound(m_lBreakPoints.begin(), m_lBreakPoints.end(), aBreakPoint);
+		if(itLow != m_lBreakPoints.end() && itLow->ePos - eTime < 0.05 && itLow->ePos - eTime > -0.05)
+		{
+			TRACE("CNavigatorBar::OnUpdateSoundData, replace the current break point.");
+			itLow->ePos = eTime;
+			itLow->nEnergy = nRelEnergy;
+			itLow->nEnergyRank = m_nSilCount;
+		}
+		else
+			m_lBreakPoints.insert(itLow, aBreakPoint);
+	}
+
+	m_nSilCount = 0;
 }
 
 void CNavigatorBar::DoDataExchange(CDataExchange* pDX)
@@ -169,6 +179,7 @@ ON_BN_CLICKED(IDC_CHECK_TRANS, &CNavigatorBar::OnBnClickedCheckTrans)
 ON_BN_CLICKED(IDC_BTN_CONTINUE, &CNavigatorBar::OnBnClickedBtnContinue)
 ON_BN_CLICKED(IDC_BTN_REPEAT, &CNavigatorBar::OnBnClickedBtnRepeat)
 ON_BN_CLICKED(IDC_BTN_SLOWREPEAT, &CNavigatorBar::OnBnClickedBtnSlowrepeat)
+ON_BN_CLICKED(IDC_BTN_PREVIOUS, &CNavigatorBar::OnBnClickedBtnPrevious)
 END_MESSAGE_MAP()
 
 void CNavigatorBar::OnBnClickedBtnPlay()
@@ -183,6 +194,8 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 		m_bIsPlayIcon = FALSE;
 		m_eDictationStartPos = 0;
 		m_eDictationEndPos = 0;
+		m_eLastBreakPointTime = 0;
+		m_dwDictationStartTime = GetTickCount();
 		m_pAudioDoc->Play();
 		m_aSliderProgress.SetAPoint(0);
 		m_aSliderProgress.SetBPoint(0);
@@ -266,6 +279,14 @@ void CNavigatorBar::UpdateUIStatus()
 	if(pTimeSpan)
 		pTimeSpan->SetWindowText(sTimeSpan);
 
+	if(m_bDictation)
+	{
+		CStatic* pDictationTime = (CStatic*)GetDlgItem(IDC_DICTATION_TIME);
+		pDictationTime->ShowWindow(m_bDictation ? SW_SHOW : SW_HIDE);
+		CString sEslaped = FormatTime((GetTickCount() - m_dwDictationStartTime) / 1000.0);
+		pDictationTime->SetWindowText(sEslaped);
+	}
+
 	int ePos = int(eCurrent * SLIDER_RANGE_MAX / eDuration);
 	m_aSliderProgress.SetPos(ePos);
 }
@@ -297,7 +318,7 @@ void CNavigatorBar::OnTimer(UINT_PTR nIDEvent)
 	if(nIDEvent == REFRESH_TIMER)
 	{
 		double eCur = GetCurrentPos();
-		if(eCur > m_eDictationEndPos && m_eDictationEndPos > 0.001 && m_pAudioDoc && m_pAudioDoc->GetStatus() == 1)
+		if(eCur > m_eDictationEndPos && m_eDictationEndPos > 0.001 && m_pAudioDoc && m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPlaying)
 		{
 			m_pAudioDoc->Pause();
 			UpdateUIStatus();
@@ -447,6 +468,10 @@ void CNavigatorBar::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 //		m_pWaveBar->EndDrag(FALSE);
 	}
+	else if(nChar == VK_F6)
+	{
+		OnBnClickedBtnPrevious();
+	}
 	else if(nChar == VK_F7)
 	{
 		OnBnClickedBtnContinue();
@@ -473,6 +498,11 @@ void CNavigatorBar::OnBnClickedCheckTrans()
 		m_aSliderProgress.SetBPoint(0);
 		m_dBreakPoint = 0;
 	}
+	CStatic* pDictationTime = (CStatic*)GetDlgItem(IDC_DICTATION_TIME);
+	pDictationTime->ShowWindow(m_bDictation ? SW_SHOW : SW_HIDE);
+	if(m_bDictation)
+		pDictationTime->SetWindowText(L"00:00");
+	m_dwDictationStartTime = GetTickCount();
 }
 
 void CNavigatorBar::OnSliderChanged()
@@ -515,19 +545,15 @@ void CNavigatorBar::RepeatRecent()
 	if(m_pAudioDoc == NULL)
 		return;
 
-	if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
+	double eCurrPos = m_pAudioDoc->GetPosition();
+	if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause || eCurrPos < m_eDictationEndPos)
 	{
 		SetRepeatB();
 		return;
 	}
 
-	double eCurrPos = m_pAudioDoc->GetPosition();
-	if(eCurrPos < m_eDictationEndPos && m_eDictationStartPos > 0)
-	{
-		eCurrPos = m_eDictationStartPos;
-	}
 	BreakPoint aDest;
-	aDest.ePos = eCurrPos;
+	aDest.ePos = eCurrPos - 10;
 	BREAKPOINTLST::iterator itFind = std::lower_bound(m_lBreakPoints.begin(), m_lBreakPoints.end(), aDest);
 	if(itFind == m_lBreakPoints.end())
 		aDest.ePos = eCurrPos - 5;
@@ -556,7 +582,7 @@ void CNavigatorBar::RepeatRecent()
 		m_aSliderProgress.SetAPoint(int(m_eDictationStartPos * SLIDER_RANGE_MAX / eDuration));
 		m_aSliderProgress.SetBPoint(int(m_eDictationEndPos * SLIDER_RANGE_MAX / eDuration));
 	}
-	if(m_pAudioDoc->GetStatus() == 2)
+	if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
 		m_pAudioDoc->Pause();
 	UpdateUIStatus();
 }
@@ -583,4 +609,39 @@ void CNavigatorBar::OnBnClickedBtnSlowrepeat()
 		SetRepeatB();
 	else
 		RepeatRecent();
+}
+
+void CNavigatorBar::OnBnClickedBtnPrevious()
+{
+	double eCurrPos = 0;
+	if(m_eDictationStartPos > 0 && m_eDictationEndPos > 0)
+		eCurrPos = m_eDictationStartPos;
+	else
+		eCurrPos = m_pAudioDoc->GetPosition();
+
+	BreakPoint aDest;
+	aDest.ePos = eCurrPos;
+	m_eDictationStartPos = 0;
+	BREAKPOINTLST::iterator itFind = std::lower_bound(m_lBreakPoints.begin(), m_lBreakPoints.end(), aDest);
+	if(itFind != m_lBreakPoints.begin())
+	{
+		itFind--;
+		if(itFind != m_lBreakPoints.end())
+			m_eDictationStartPos = itFind->ePos;
+	}
+	
+	m_eDictationEndPos = eCurrPos;
+	if(m_eDictationEndPos - m_eDictationStartPos > 6)
+		m_eDictationStartPos = eCurrPos - 6;
+
+	m_pAudioDoc->SetPosition(m_eDictationStartPos);
+
+	double eDuration = m_pAudioDoc->GetDuration();
+	if(eDuration != 0)
+	{
+		m_aSliderProgress.SetAPoint(int(m_eDictationStartPos * SLIDER_RANGE_MAX / eDuration));
+		m_aSliderProgress.SetBPoint(int(m_eDictationEndPos * SLIDER_RANGE_MAX / eDuration));
+	}
+	if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
+		m_pAudioDoc->Pause();
 }
