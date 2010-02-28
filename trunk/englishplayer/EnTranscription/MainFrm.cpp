@@ -71,10 +71,10 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
 	cs.cx = 800;
 	cs.cy = 600;
+	cs.style &= ~FWS_ADDTOTITLE;	//Prevent "no title" in the title bar
+
 	if( !CFrameWnd::PreCreateWindow(cs) )
 		return FALSE;
-	// TODO: Modify the Window class or styles here by modifying
-	//  the CREATESTRUCT cs
 
 	return TRUE;
 }
@@ -118,4 +118,9 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 	}
 
 	return CFrameWnd::PreTranslateMessage(pMsg);
+}
+
+BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
+{
+	return m_wndNavigator.OpenMediaFile(lpszPath);
 }

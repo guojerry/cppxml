@@ -12,7 +12,6 @@
 // CEnTranscriptionApp:
 // See EnTranscription.cpp for the implementation of this class
 //
-
 class CEnTranscriptionApp : public CWinApp
 {
 public:

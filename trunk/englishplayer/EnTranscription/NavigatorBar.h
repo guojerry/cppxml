@@ -38,6 +38,7 @@ public:
 	void SetCurrentPos(double pos);
 	virtual void OnStatusChange();
 	virtual void OnUpdateSoundData(double eTime, int nRelEnergy);
+	BOOL OpenMediaFile(LPCTSTR lpszPath);
 
 protected:
 	void UpdateUIStatus();

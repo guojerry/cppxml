@@ -223,6 +223,20 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 	UpdateUIStatus();
 }
 
+BOOL CNavigatorBar::OpenMediaFile(LPCTSTR lpszPath)
+{
+	if(m_pAudioDoc)
+	{
+		if(m_pAudioDoc->GetStatus() != CAudioDoc::eStatusStop)
+			m_pAudioDoc->Stop();
+
+		HRESULT hr = m_pAudioDoc->MapFile(lpszPath);
+		if(SUCCEEDED(hr))
+			OnBnClickedBtnPlay();
+	}
+	return TRUE;
+}
+
 void CNavigatorBar::OnBnClickedBtnOpen()
 {
 	CFileDialog dlg(TRUE);
