@@ -55,7 +55,8 @@ void CAudioProcess::ProcessSample(char* pDataIn, DWORD dwSampleCounts)
 	lEnergy /= dwSampleCounts;
 	m_eTotalEnergy += lEnergy;
 	m_nTotalWindow++;
-	int nRelEnergy = int(lEnergy * m_nTotalWindow * 100 / m_eTotalEnergy);
+//	int nRelEnergy = int(lEnergy * m_nTotalWindow * 100 / m_eTotalEnergy);
+	int nRelEnergy = int(sqrt(lEnergy) * 100.0 / 32768.0);
 	if(m_pParent)
 		m_pParent->UpdateEnergy(nRelEnergy);
 

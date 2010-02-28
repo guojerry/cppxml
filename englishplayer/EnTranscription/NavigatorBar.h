@@ -61,6 +61,8 @@ protected:
 	double m_dBreakPoint;
 	BREAKPOINTLST m_lBreakPoints;
 	BOOL m_bIsPlayIcon;
+	DWORD m_dwDictationStartTime;
+	double m_eLastBreakPointTime;
 
 public:
 	afx_msg void OnBnClickedBtnPlay();
@@ -77,4 +79,5 @@ public:
 	afx_msg void OnBnClickedBtnContinue();
 	afx_msg void OnBnClickedBtnRepeat();
 	afx_msg void OnBnClickedBtnSlowrepeat();
+	afx_msg void OnBnClickedBtnPrevious();
 };

@@ -109,24 +109,10 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
 	if(pMsg && pMsg->message == WM_KEYDOWN)
 	{
-		if(pMsg->wParam == VK_ESCAPE)
+		if( pMsg->wParam == VK_ESCAPE || pMsg->wParam == VK_F7 || 
+			pMsg->wParam == VK_F8 || pMsg->wParam == VK_F9 || pMsg->wParam == VK_F6)
 		{
-			if(m_wndNavigator.SendMessage(WM_KEYDOWN, VK_ESCAPE, 0))
-				return TRUE;
-		}
-		else if(pMsg->wParam == VK_F7)
-		{
-			if(m_wndNavigator.SendMessage(WM_KEYDOWN, VK_F7, 0))
-				return TRUE;
-		}
-		else if(pMsg->wParam == VK_F8)
-		{
-			if(m_wndNavigator.SendMessage(WM_KEYDOWN, VK_F8, 0))
-				return TRUE;
-		}
-		else if(pMsg->wParam == VK_F9)
-		{
-			if(m_wndNavigator.SendMessage(WM_KEYDOWN, VK_F9, 0))
+			if(m_wndNavigator.SendMessage(WM_KEYDOWN, pMsg->wParam, 0))
 				return TRUE;
 		}
 	}

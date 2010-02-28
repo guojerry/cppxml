@@ -36,8 +36,10 @@
 #define IDC_STATIC_VOLUME               1009
 #define IDC_STATIC_SPEED                1010
 #define IDC_BTN_REPEAT                  1011
-#define IDC_BTN_STOP4                   1012
 #define IDC_BTN_SLOWREPEAT              1012
+#define IDC_BTN_PREVIOUS                1013
+#define IDC_TIMESPAN2                   1014
+#define IDC_DICTATION_TIME              1014
 #define IDC_MY_PROGRESS                 1015
 
 // Next default values for new objects
