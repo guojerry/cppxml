@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "EnTranscription.h"
-#include "RichEditThemed.h"
 #include "EnTranscriptionDoc.h"
 #include "EnTranscriptionView.h"
 #include "shlwapi.h"
