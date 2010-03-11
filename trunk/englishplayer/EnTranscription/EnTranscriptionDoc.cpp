@@ -13,9 +13,9 @@
 
 // CEnTranscriptionDoc
 
-IMPLEMENT_DYNCREATE(CEnTranscriptionDoc, CDocument)
+IMPLEMENT_DYNCREATE(CEnTranscriptionDoc, CHtmlEditDoc)
 
-BEGIN_MESSAGE_MAP(CEnTranscriptionDoc, CDocument)
+BEGIN_MESSAGE_MAP(CEnTranscriptionDoc, CHtmlEditDoc)
 END_MESSAGE_MAP()
 
 
@@ -33,10 +33,10 @@ CEnTranscriptionDoc::~CEnTranscriptionDoc()
 
 BOOL CEnTranscriptionDoc::OnNewDocument()
 {
-	if (!CDocument::OnNewDocument())
+	if (!CHtmlEditDoc::OnNewDocument())
 		return FALSE;
 
-	reinterpret_cast<CEditView*>(m_viewList.GetHead())->SetWindowText(NULL);
+	reinterpret_cast<CHtmlEditView*>(m_viewList.GetHead())->SetWindowText(NULL);
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
@@ -49,12 +49,10 @@ BOOL CEnTranscriptionDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
 	if(pFrame)
 		return pFrame->OpenMediaFile(lpszPathName);
-	return FALSE;
+	return TRUE;
 }
 
-
 // CEnTranscriptionDoc serialization
-
 void CEnTranscriptionDoc::Serialize(CArchive& ar)
 {
 	// CEditView contains an edit control which handles all serialization
@@ -67,12 +65,12 @@ void CEnTranscriptionDoc::Serialize(CArchive& ar)
 #ifdef _DEBUG
 void CEnTranscriptionDoc::AssertValid() const
 {
-	CDocument::AssertValid();
+	CHtmlEditDoc::AssertValid();
 }
 
 void CEnTranscriptionDoc::Dump(CDumpContext& dc) const
 {
-	CDocument::Dump(dc);
+	CHtmlEditDoc::Dump(dc);
 }
 #endif //_DEBUG
 
