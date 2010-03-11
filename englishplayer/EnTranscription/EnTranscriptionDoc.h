@@ -5,7 +5,7 @@
 #pragma once
 
 
-class CEnTranscriptionDoc : public CDocument
+class CEnTranscriptionDoc : public CHtmlEditDoc
 {
 protected: // create from serialization only
 	CEnTranscriptionDoc();

@@ -12,7 +12,6 @@
 #define IDS_STOP_TIPS                   103
 #define IDP_SOCKETS_INIT_FAILED         104
 #define ID_INDICATOR_INS                105
-#define IDS_STRING106ID_INDICATOR_INS   106
 #define IDR_MAINFRAME                   128
 #define IDR_TranscriptionTYPE           129
 #define IDI_PLAY                        130
@@ -26,6 +25,7 @@
 #define IDB_BAR_LEFT                    145
 #define IDB_BAR_RIGHT                   146
 #define IDB_KNOB_PRESSED                148
+#define IDR_TEXT_POPUP                  149
 #define IDC_BTN_PLAY                    1000
 #define IDC_BTN_OPEN                    1001
 #define IDC_BTN_STOP                    1002
@@ -46,13 +46,34 @@
 #define ID_PLAY_REPEATSETEN             32772
 #define ID_PLAY_REPEAT                  32773
 #define ID_PLAY_REPEATSLOWLY            32774
+#define ID_PLAY_CONTINUE                32775
+#define ID_PLAY_PREVIOUS                32776
+#define ID_FILE_MYSAVE                  32777
+#define ID_FILE_MY_SAVE_AS              32778
+#define ID_TEXT_ITALIC                  32783
+#define ID_TEXT_BOLD                    32784
+#define ID_TEXT_UNDERLINE               32785
+#define ID_TEXT_HIGHLIGHT               32786
+#define ID_TEXT_SELECTCOLOR             32787
+#define ID_TEXT_Q                       32788
+#define ID_TEXT_SAVEAS                  32789
+#define ID_TEXT_HYPERLIN                32790
+#define ID_TEXT_SELECTFONT              32791
+#define ID_BUTTON_HYPERLINK             32792
+#define ID_BUTTON_BOLD                  32793
+#define ID_BUTTON_ITALIC                32794
+#define ID_BUTTON_ITsdALIC              32795
+#define ID_BUTTON_UNDERLINE             32796
+#define ID_BUTTON_HIGHLIGHT             32797
+#define ID_BUTTON_FONT                  32798
+#define ID_BUTTON_COLOR                 32799
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        149
-#define _APS_NEXT_COMMAND_VALUE         32775
+#define _APS_NEXT_RESOURCE_VALUE        150
+#define _APS_NEXT_COMMAND_VALUE         32806
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           102
 #endif

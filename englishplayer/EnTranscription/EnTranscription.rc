@@ -208,8 +208,8 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
-        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_MYSAVE
+        MENUITEM "Save &As...",                 ID_FILE_MY_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
@@ -225,14 +225,33 @@ BEGIN
     END
     POPUP "&Play"
     BEGIN
-        MENUITEM "Previous\tF6",                ID_PLAY_PLAYPREVIOUSSENTENCE
-        MENUITEM "Continue Next\tF7",           ID_PLAY_REPEATSETEN
+        MENUITEM "Previous\tF6",                ID_PLAY_PREVIOUS
+        MENUITEM "Continue Next\tF7",           ID_PLAY_CONTINUE
         MENUITEM "Repeat\tF8",                  ID_PLAY_REPEAT
         MENUITEM "Repeat Slowly\tF9",           ID_PLAY_REPEATSLOWLY
     END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About EnTranscription...",   ID_APP_ABOUT
+    END
+END
+
+IDR_TEXT_POPUP MENU 
+BEGIN
+    POPUP "TEXT_POPUP"
+    BEGIN
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM SEPARATOR
+        MENUITEM "&Italic\tCtrl+I",             ID_BUTTON_ITALIC
+        MENUITEM "&Bold\tCtrl+B",               ID_BUTTON_BOLD
+        MENUITEM "&Underline\tCtrl+U",          ID_BUTTON_UNDERLINE
+        MENUITEM "&Highlight\tCtrl+H",          ID_BUTTON_HIGHLIGHT
+        MENUITEM SEPARATOR
+        MENUITEM "Hyperlink...\tCtrl+K",        ID_BUTTON_HYPERLINK
+        MENUITEM "Select Color...",             ID_BUTTON_COLOR
+        MENUITEM "Select Font...\tCtrl+F",      ID_BUTTON_FONT
     END
 END
 
@@ -244,20 +263,22 @@ END
 
 IDR_MAINFRAME ACCELERATORS 
 BEGIN
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
-    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
-    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
-    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
-    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
-    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
-    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
-    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+    "B",            ID_BUTTON_BOLD,         VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_BUTTON_FONT,         VIRTKEY, CONTROL, NOINVERT
+    "K",            ID_BUTTON_HYPERLINK,    VIRTKEY, CONTROL, NOINVERT
+    "I",            ID_BUTTON_ITALIC,       VIRTKEY, CONTROL, NOINVERT
+    "U",            ID_BUTTON_UNDERLINE,    VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_MYSAVE,         VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_BUTTON_HIGHLIGHT,    VIRTKEY, CONTROL, NOINVERT
 END
 
 

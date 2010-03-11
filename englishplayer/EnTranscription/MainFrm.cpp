@@ -19,6 +19,12 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 //	ON_WM_ERASEBKGND()
 //ON_WM_KEYDOWN()
+ON_COMMAND(ID_PLAY_PREVIOUS, &CMainFrame::OnPlayPrevious)
+ON_COMMAND(ID_PLAY_CONTINUE, &CMainFrame::OnPlayContinue)
+ON_COMMAND(ID_PLAY_REPEAT, &CMainFrame::OnPlayRepeat)
+ON_COMMAND(ID_PLAY_REPEATSLOWLY, &CMainFrame::OnPlayRepeatslowly)
+ON_COMMAND(ID_FILE_MYSAVE, &CMainFrame::OnFileMysave)
+ON_COMMAND(ID_FILE_MY_SAVE_AS, &CMainFrame::OnFileMySaveAs)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -40,7 +46,6 @@ CMainFrame::CMainFrame()
 CMainFrame::~CMainFrame()
 {
 }
-
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
@@ -123,4 +128,33 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
 {
 	return m_wndNavigator.OpenMediaFile(lpszPath);
+}
+
+void CMainFrame::OnPlayPrevious()
+{
+	m_wndNavigator.OnBnClickedBtnPrevious();
+}
+
+void CMainFrame::OnPlayContinue()
+{
+	m_wndNavigator.OnBnClickedBtnContinue();
+}
+
+void CMainFrame::OnPlayRepeat()
+{
+	m_wndNavigator.OnBnClickedBtnRepeat();
+}
+
+void CMainFrame::OnPlayRepeatslowly()
+{
+	m_wndNavigator.OnBnClickedBtnSlowrepeat();
+}
+
+void CMainFrame::OnFileMysave()
+{
+	// TODO: Add your command handler code here
+}
+
+void CMainFrame::OnFileMySaveAs()
+{
 }

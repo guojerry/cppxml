@@ -5,7 +5,7 @@
 #pragma once
 
 
-class CEnTranscriptionView : public CEditView
+class CEnTranscriptionView : public CHtmlEditView
 {
 protected: // create from serialization only
 	CEnTranscriptionView();
@@ -25,8 +25,11 @@ protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	virtual void OnInitialUpdate();
+	virtual void OnNavigateComplete2(LPCTSTR strURL);
+	virtual HRESULT OnShowContextMenu(DWORD dwID, LPPOINT ppt, LPUNKNOWN pcmdtReserved, LPDISPATCH pdispReserved);
 
-// Implementation
+	// Implementation
 public:
 	virtual ~CEnTranscriptionView();
 #ifdef _DEBUG
@@ -39,7 +42,10 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+	DECLARE_DHTMLEDITING_CMDMAP(CEnTranscriptionView);
 public:
+	afx_msg void OnButtonColor(UINT);
+	afx_msg void OnButtonHighLight(UINT);
 };
 
 #ifndef _DEBUG  // debug version in EnTranscriptionView.cpp

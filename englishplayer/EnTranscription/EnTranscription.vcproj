@@ -96,6 +96,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="copy html"
+				CommandLine="copy /a .\tutorial.htm $(OutDir)"
 			/>
 		</Configuration>
 		<Configuration
@@ -182,6 +184,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy /a .\tutorial.htm $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -231,6 +234,10 @@
 			</File>
 			<File
 				RelativePath=".\NavigatorBar.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RichEditThemed.cpp"
 				>
 			</File>
 			<File
@@ -313,6 +320,10 @@
 			</File>
 			<File
 				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RichEditThemed.h"
 				>
 			</File>
 			<File

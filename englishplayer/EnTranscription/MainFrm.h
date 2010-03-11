@@ -42,4 +42,10 @@ protected:
 public:
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnPlayPrevious();
+	afx_msg void OnPlayContinue();
+	afx_msg void OnPlayRepeat();
+	afx_msg void OnPlayRepeatslowly();
+	afx_msg void OnFileMysave();
+	afx_msg void OnFileMySaveAs();
 };
