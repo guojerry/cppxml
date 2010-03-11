@@ -237,10 +237,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RichEditThemed.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
