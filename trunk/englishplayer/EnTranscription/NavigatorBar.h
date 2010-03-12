@@ -39,6 +39,7 @@ public:
 	virtual void OnStatusChange();
 	virtual void OnUpdateSoundData(double eTime, int nRelEnergy);
 	BOOL OpenMediaFile(LPCTSTR lpszPath);
+	CString GetPlayingFileName();
 
 protected:
 	void UpdateUIStatus();
@@ -64,6 +65,7 @@ protected:
 	BOOL m_bIsPlayIcon;
 	DWORD m_dwDictationStartTime;
 	double m_eLastBreakPointTime;
+	CString m_sPlayingFileName;
 
 public:
 	afx_msg void OnBnClickedBtnPlay();

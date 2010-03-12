@@ -13,6 +13,7 @@
 
 #define TUTORIAL_FILENAME		_T("tutorial.htm")
 #define TEMPLATE_FILENAME		_T("template.htm")
+#define HIDDEN_SCRIPT_DIR		_T(".transcriptions")
 
 // CEnTranscriptionView
 
@@ -59,12 +60,45 @@ BOOL CEnTranscriptionView::PreCreateWindow(CREATESTRUCT& cs)
 	return bPreCreated;
 }
 
+void CEnTranscriptionView::AutoSave(const CString& szCurrentPlay)
+{
+	if(szCurrentPlay.IsEmpty())
+		return;
+
+	TCHAR szFilePath[MAX_PATH] = {0};
+	_tcscpy_s(szFilePath, MAX_PATH, szCurrentPlay);
+	CString sFileName = PathFindFileName(szFilePath);
+	PathRemoveFileSpec(szFilePath);
+	PathAppend(szFilePath, HIDDEN_SCRIPT_DIR);
+	if(!PathIsDirectory(szFilePath))
+	{
+		CreateDirectory(szFilePath, NULL);
+		SetFileAttributes(szFilePath, FILE_ATTRIBUTE_HIDDEN);
+	}
+	sFileName += _T(".htm");
+	PathAppend(szFilePath, sFileName);
+
+	LPDISPATCH pDispatch = GetHtmlDocument();
+	if(pDispatch)
+	{
+		IPersistFile* pFile;
+		HRESULT hr = pDispatch->QueryInterface(__uuidof(IPersistFile), (void**)&pFile);
+		if(SUCCEEDED(hr))
+		{
+			pFile->Save(szFilePath, FALSE);
+			pFile->Release();
+			GetDocument()->SetModifiedFlag(FALSE);
+		}
+		pDispatch->Release();
+	}
+}
+
 void CEnTranscriptionView::OnInitialUpdate()
 {
+	TCHAR szFilePath[MAX_PATH] = {0};
 	CString strCmdLine(AfxGetApp()->m_lpCmdLine);
 	if(strCmdLine.IsEmpty())
 	{
-		TCHAR szFilePath[MAX_PATH] = {0};
 		GetModuleFileName(NULL, szFilePath, MAX_PATH);
 		PathRemoveFileSpec(szFilePath);
 		PathAppend(szFilePath, TUTORIAL_FILENAME);
@@ -73,6 +107,34 @@ void CEnTranscriptionView::OnInitialUpdate()
 	}
 	else
 	{
+		_tcscpy_s(szFilePath, MAX_PATH, (LPCTSTR)strCmdLine);
+		strCmdLine.Empty();
+		CString sFileName = PathFindFileName(szFilePath);
+		PathRemoveFileSpec(szFilePath);
+		PathAppend(szFilePath, HIDDEN_SCRIPT_DIR);
+		if(!PathIsDirectory(szFilePath))
+		{
+			CreateDirectory(szFilePath, NULL);
+			SetFileAttributes(szFilePath, FILE_ATTRIBUTE_HIDDEN);
+		}
+		else
+		{
+			sFileName += _T(".htm");
+			PathAppend(szFilePath, sFileName);
+			if(PathFileExists(szFilePath))
+			{
+				strCmdLine = _T("file:///");
+				strCmdLine += szFilePath;
+			}
+		}
+		if(strCmdLine.IsEmpty())
+		{
+			GetModuleFileName(NULL, szFilePath, MAX_PATH);
+			PathRemoveFileSpec(szFilePath);
+			PathAppend(szFilePath, TEMPLATE_FILENAME);
+			strCmdLine = _T("file:///");
+			strCmdLine += szFilePath;
+		}
 	}
 	Navigate(strCmdLine);
 	CHtmlEditView::OnInitialUpdate();
@@ -98,8 +160,8 @@ UINT_PTR CALLBACK CdlgHook(  HWND hdlg,UINT uiMsg,WPARAM /*wParam*/, LPARAM lPar
 
 void CEnTranscriptionView::OnButtonHighLight(UINT)
 {
-	SetForeColor(_T("3d85c6"));
-	SetBackColor(_T("ffe599"));
+	SetForeColor(_T("ffe599"));
+	SetBackColor(_T("3d85c6"));
 	SetFontSize(4);
 	Italic();
 	Bold();

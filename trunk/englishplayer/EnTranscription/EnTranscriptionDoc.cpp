@@ -59,7 +59,6 @@ void CEnTranscriptionDoc::Serialize(CArchive& ar)
 	reinterpret_cast<CEditView*>(m_viewList.GetHead())->SerializeRaw(ar);
 }
 
-
 // CEnTranscriptionDoc diagnostics
 
 #ifdef _DEBUG

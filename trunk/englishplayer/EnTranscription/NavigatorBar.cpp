@@ -225,6 +225,7 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 
 BOOL CNavigatorBar::OpenMediaFile(LPCTSTR lpszPath)
 {
+	m_sPlayingFileName = lpszPath;
 	if(m_pAudioDoc)
 	{
 		if(m_pAudioDoc->GetStatus() != CAudioDoc::eStatusStop)
@@ -243,17 +244,7 @@ void CNavigatorBar::OnBnClickedBtnOpen()
 	if(IDOK == dlg.DoModal())
 	{
 		CString sFilePath = dlg.GetPathName();
-		CString sFileName = dlg.GetFileName();
-
-		if(m_pAudioDoc)
-		{
-			if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
-				m_pAudioDoc->Stop();
-
-			HRESULT hr = m_pAudioDoc->MapFile(sFilePath);
-			if(SUCCEEDED(hr))
-				OnBnClickedBtnPlay();
-		}
+		OpenMediaFile(sFilePath);
 	}
 }
 
@@ -658,4 +649,9 @@ void CNavigatorBar::OnBnClickedBtnPrevious()
 	}
 	if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause)
 		m_pAudioDoc->Pause();
+}
+
+CString CNavigatorBar::GetPlayingFileName()
+{
+	return m_sPlayingFileName;
 }

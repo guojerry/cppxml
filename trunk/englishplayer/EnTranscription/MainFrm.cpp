@@ -5,6 +5,8 @@
 #include "EnTranscription.h"
 #include "NavigatorBar.h"
 #include "MainFrm.h"
+#include "EnTranscriptionDoc.h"
+#include "EnTranscriptionView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,6 +70,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	CenterWindow();
+
+	CString strCmdLine(AfxGetApp()->m_lpCmdLine);
+	if(!strCmdLine.IsEmpty())
+		OpenMediaFile(strCmdLine);
 
 	return 0;
 }
@@ -152,7 +158,9 @@ void CMainFrame::OnPlayRepeatslowly()
 
 void CMainFrame::OnFileMysave()
 {
-	// TODO: Add your command handler code here
+	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
+	if(pView)
+		pView->AutoSave(m_wndNavigator.GetPlayingFileName());
 }
 
 void CMainFrame::OnFileMySaveAs()
