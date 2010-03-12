@@ -17,6 +17,7 @@ public:
 
 // Operations
 public:
+	void AutoSave(const CString& szCurrentPlay);
 
 // Overrides
 public:
