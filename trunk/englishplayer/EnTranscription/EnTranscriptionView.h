@@ -17,7 +17,6 @@ public:
 
 // Operations
 public:
-	void AutoSave(const CString& szCurrentPlay);
 	void OpenTranscription(const CString& sFilePath);
 	void ShowTutorial();
 

@@ -5,14 +5,14 @@
 #include "EnTranscription.h"
 #include "MainFrm.h"
 #include "EnTranscriptionDoc.h"
+#include "EnTranscriptionView.h"
+#include "shlwapi.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
 // CEnTranscriptionDoc
-
 IMPLEMENT_DYNCREATE(CEnTranscriptionDoc, CHtmlEditDoc)
 
 BEGIN_MESSAGE_MAP(CEnTranscriptionDoc, CHtmlEditDoc)
@@ -20,7 +20,6 @@ END_MESSAGE_MAP()
 
 
 // CEnTranscriptionDoc construction/destruction
-
 CEnTranscriptionDoc::CEnTranscriptionDoc()
 {
 	// TODO: add one-time construction code here
@@ -49,18 +48,46 @@ BOOL CEnTranscriptionDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	CMainFrame* pFrame = (CMainFrame*)AfxGetMainWnd();
 	if(pFrame)
 		return pFrame->OpenMediaFile(lpszPathName);
+
 	return TRUE;
 }
 
-// CEnTranscriptionDoc serialization
-void CEnTranscriptionDoc::Serialize(CArchive& ar)
+CString CEnTranscriptionDoc::GetDefaultPath(LPCTSTR lpszPathName)
 {
-	// CEditView contains an edit control which handles all serialization
-	reinterpret_cast<CEditView*>(m_viewList.GetHead())->SerializeRaw(ar);
+	TCHAR szFilePath[MAX_PATH] = {0};
+	_tcscpy_s(szFilePath, MAX_PATH, lpszPathName);
+
+	CString sFileName = PathFindFileName(szFilePath);
+	PathRemoveFileSpec(szFilePath);
+	PathAppend(szFilePath, HIDDEN_SCRIPT_DIR);
+	if(!PathIsDirectory(szFilePath))
+	{
+		CreateDirectory(szFilePath, NULL);
+		SetFileAttributes(szFilePath, FILE_ATTRIBUTE_HIDDEN);
+	}
+	sFileName += _T(".htm");
+	PathAppend(szFilePath, sFileName);
+
+	return CString(szFilePath);
+}
+
+void CEnTranscriptionDoc::SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU)
+{
+	if(m_strPathName.CompareNoCase(lpszPathName) != 0)
+	{
+		CString sDocPath = GetDefaultPath(lpszPathName);
+		CHtmlEditDoc::SetPathName(sDocPath, bAddToMRU);
+	}
+	else
+		CHtmlEditDoc::SetPathName(lpszPathName, bAddToMRU);
+}
+
+BOOL CEnTranscriptionDoc::OnSaveDocument(LPCTSTR lpszPathName)
+{
+	return CHtmlEditDoc::OnSaveDocument(lpszPathName);
 }
 
 // CEnTranscriptionDoc diagnostics
-
 #ifdef _DEBUG
 void CEnTranscriptionDoc::AssertValid() const
 {

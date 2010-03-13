@@ -5,6 +5,10 @@
 #pragma once
 
 
+#define TUTORIAL_FILENAME		_T("tutorial.htm")
+#define TEMPLATE_FILENAME		_T("template.htm")
+#define HIDDEN_SCRIPT_DIR		_T(".transcriptions")
+
 class CEnTranscriptionDoc : public CHtmlEditDoc
 {
 protected: // create from serialization only
@@ -21,9 +25,10 @@ public:
 public:
 	virtual BOOL OnNewDocument();
 	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	virtual void Serialize(CArchive& ar);
+	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
+	virtual void SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU = TRUE);
 
-// Implementation
+	// Implementation
 public:
 	virtual ~CEnTranscriptionDoc();
 #ifdef _DEBUG
@@ -32,6 +37,7 @@ public:
 #endif
 
 protected:
+	CString GetDefaultPath(LPCTSTR lpszPathName);
 
 // Generated message map functions
 protected:

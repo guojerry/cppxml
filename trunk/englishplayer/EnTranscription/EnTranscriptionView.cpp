@@ -11,10 +11,6 @@
 #define new DEBUG_NEW
 #endif
 
-#define TUTORIAL_FILENAME		_T("tutorial.htm")
-#define TEMPLATE_FILENAME		_T("template.htm")
-#define HIDDEN_SCRIPT_DIR		_T(".transcriptions")
-
 // CEnTranscriptionView
 
 IMPLEMENT_DYNCREATE(CEnTranscriptionView, CHtmlEditView)
@@ -61,41 +57,9 @@ BOOL CEnTranscriptionView::PreCreateWindow(CREATESTRUCT& cs)
 	return bPreCreated;
 }
 
-void CEnTranscriptionView::AutoSave(const CString& szCurrentPlay)
-{
-	if(szCurrentPlay.IsEmpty())
-		return;
-
-	TCHAR szFilePath[MAX_PATH] = {0};
-	_tcscpy_s(szFilePath, MAX_PATH, szCurrentPlay);
-	CString sFileName = PathFindFileName(szFilePath);
-	PathRemoveFileSpec(szFilePath);
-	PathAppend(szFilePath, HIDDEN_SCRIPT_DIR);
-	if(!PathIsDirectory(szFilePath))
-	{
-		CreateDirectory(szFilePath, NULL);
-		SetFileAttributes(szFilePath, FILE_ATTRIBUTE_HIDDEN);
-	}
-	sFileName += _T(".htm");
-	PathAppend(szFilePath, sFileName);
-
-	LPDISPATCH pDispatch = GetHtmlDocument();
-	if(pDispatch)
-	{
-		IPersistFile* pFile;
-		HRESULT hr = pDispatch->QueryInterface(__uuidof(IPersistFile), (void**)&pFile);
-		if(SUCCEEDED(hr))
-		{
-			pFile->Save(szFilePath, FALSE);
-			pFile->Release();
-			GetDocument()->SetModifiedFlag(FALSE);
-		}
-		pDispatch->Release();
-	}
-}
-
 void CEnTranscriptionView::OpenTranscription(const CString& sFilePath)
 {
+	BOOL bMod = GetDocument()->IsModified();
 	if(sFilePath.IsEmpty())
 		return;
 
@@ -128,6 +92,7 @@ void CEnTranscriptionView::OpenTranscription(const CString& sFilePath)
 		strCmdLine = _T("file:///");
 		strCmdLine += szFilePath;
 	}
+	NewDocument();
 	Navigate(strCmdLine);
 }
 
