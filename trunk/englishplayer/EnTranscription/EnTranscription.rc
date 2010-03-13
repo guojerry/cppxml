@@ -208,7 +208,7 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_MY_SAVE
         MENUITEM "Save &As...",                 ID_FILE_MY_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
@@ -277,8 +277,8 @@ BEGIN
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_MY_SAVE,        VIRTKEY, CONTROL, NOINVERT
 END
 
 

@@ -48,4 +48,5 @@ public:
 	afx_msg void OnPlayRepeat();
 	afx_msg void OnPlayRepeatslowly();
 	afx_msg void OnFileMySaveAs();
+	afx_msg void OnFileSave();
 };

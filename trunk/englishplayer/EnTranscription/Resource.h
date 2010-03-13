@@ -67,13 +67,14 @@
 #define ID_BUTTON_HIGHLIGHT             32797
 #define ID_BUTTON_FONT                  32798
 #define ID_BUTTON_COLOR                 32799
+#define ID_FILE_MY_SAVE                 32806
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        150
-#define _APS_NEXT_COMMAND_VALUE         32806
+#define _APS_NEXT_COMMAND_VALUE         32807
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           102
 #endif

@@ -75,11 +75,13 @@ void CEnTranscriptionDoc::SetPathName(LPCTSTR lpszPathName, BOOL bAddToMRU)
 {
 	if(m_strPathName.CompareNoCase(lpszPathName) != 0)
 	{
+		if (bAddToMRU)
+			AfxGetApp()->AddToRecentFileList(lpszPathName);
 		CString sDocPath = GetDefaultPath(lpszPathName);
-		CHtmlEditDoc::SetPathName(sDocPath, bAddToMRU);
+		CHtmlEditDoc::SetPathName(sDocPath, FALSE);
 	}
 	else
-		CHtmlEditDoc::SetPathName(lpszPathName, bAddToMRU);
+		CHtmlEditDoc::SetPathName(lpszPathName, FALSE);
 }
 
 BOOL CEnTranscriptionDoc::OnSaveDocument(LPCTSTR lpszPathName)
