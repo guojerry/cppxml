@@ -59,7 +59,6 @@ BOOL CEnTranscriptionView::PreCreateWindow(CREATESTRUCT& cs)
 
 void CEnTranscriptionView::OpenTranscription(const CString& sFilePath)
 {
-	BOOL bMod = GetDocument()->IsModified();
 	if(sFilePath.IsEmpty())
 		return;
 
