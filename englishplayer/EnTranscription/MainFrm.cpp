@@ -7,6 +7,7 @@
 #include "MainFrm.h"
 #include "EnTranscriptionDoc.h"
 #include "EnTranscriptionView.h"
+#include "shlwapi.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -129,6 +130,13 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
 {
+	TCHAR szAppTitle[MAX_PATH] = {0};
+	LoadString(AfxGetInstanceHandle(), AFX_IDS_APP_TITLE, szAppTitle, MAX_PATH);
+	TCHAR* sFileName = PathFindFileName(lpszPath);
+	CString sTitle;
+	sTitle.Format(_T("%s - %s"), sFileName, szAppTitle);
+	SetWindowText(sTitle);
+
 	if(lpszPath == NULL)
 		return FALSE;
 	
