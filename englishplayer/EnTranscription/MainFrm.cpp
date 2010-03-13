@@ -26,6 +26,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_COMMAND(ID_PLAY_REPEAT, &CMainFrame::OnPlayRepeat)
 	ON_COMMAND(ID_PLAY_REPEATSLOWLY, &CMainFrame::OnPlayRepeatslowly)
 	ON_COMMAND(ID_FILE_MY_SAVE_AS, &CMainFrame::OnFileMySaveAs)
+	ON_COMMAND(ID_FILE_MY_SAVE, &CMainFrame::OnFileSave)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -174,4 +175,11 @@ void CMainFrame::OnFileMySaveAs()
 	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
 	if(pView)
 		pView->SaveAs(NULL);
+}
+
+void CMainFrame::OnFileSave()
+{
+	CEnTranscriptionDoc* pDoc = dynamic_cast<CEnTranscriptionDoc*>(GetActiveDocument());
+	if(pDoc)
+		pDoc->OnSaveDocument(pDoc->GetPathName());
 }
