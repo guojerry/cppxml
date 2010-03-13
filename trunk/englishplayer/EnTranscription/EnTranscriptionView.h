@@ -18,6 +18,8 @@ public:
 // Operations
 public:
 	void AutoSave(const CString& szCurrentPlay);
+	void OpenTranscription(const CString& sFilePath);
+	void ShowTutorial();
 
 // Overrides
 public:
@@ -47,6 +49,7 @@ protected:
 public:
 	afx_msg void OnButtonColor(UINT);
 	afx_msg void OnButtonHighLight(UINT);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 
 #ifndef _DEBUG  // debug version in EnTranscriptionView.cpp

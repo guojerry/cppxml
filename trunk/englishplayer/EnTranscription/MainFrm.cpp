@@ -71,10 +71,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CenterWindow();
 
-	CString strCmdLine(AfxGetApp()->m_lpCmdLine);
-	if(!strCmdLine.IsEmpty())
-		OpenMediaFile(strCmdLine);
-
 	return 0;
 }
 
@@ -133,7 +129,19 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
 {
-	return m_wndNavigator.OpenMediaFile(lpszPath);
+	BOOL bRet = m_wndNavigator.OpenMediaFile(lpszPath);
+	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
+	if(pView)
+		pView->OpenTranscription(lpszPath);
+
+	return bRet;
+}
+
+void CMainFrame::ShowTutorial()
+{
+	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
+	if(pView)
+		pView->ShowTutorial();
 }
 
 void CMainFrame::OnPlayPrevious()

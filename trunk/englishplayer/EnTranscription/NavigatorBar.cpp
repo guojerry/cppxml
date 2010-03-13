@@ -240,12 +240,7 @@ BOOL CNavigatorBar::OpenMediaFile(LPCTSTR lpszPath)
 
 void CNavigatorBar::OnBnClickedBtnOpen()
 {
-	CFileDialog dlg(TRUE);
-	if(IDOK == dlg.DoModal())
-	{
-		CString sFilePath = dlg.GetPathName();
-		OpenMediaFile(sFilePath);
-	}
+	SendMessage(WM_COMMAND, ID_FILE_OPEN, 0);
 }
 
 void CNavigatorBar::OnBnClickedBtnStop()
