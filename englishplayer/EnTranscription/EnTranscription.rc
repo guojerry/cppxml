@@ -208,7 +208,7 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Save\tCtrl+S",               ID_FILE_MYSAVE
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
         MENUITEM "Save &As...",                 ID_FILE_MY_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
@@ -265,6 +265,7 @@ IDR_MAINFRAME ACCELERATORS
 BEGIN
     "B",            ID_BUTTON_BOLD,         VIRTKEY, CONTROL, NOINVERT
     "F",            ID_BUTTON_FONT,         VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_BUTTON_HIGHLIGHT,    VIRTKEY, CONTROL, NOINVERT
     "K",            ID_BUTTON_HYPERLINK,    VIRTKEY, CONTROL, NOINVERT
     "I",            ID_BUTTON_ITALIC,       VIRTKEY, CONTROL, NOINVERT
     "U",            ID_BUTTON_UNDERLINE,    VIRTKEY, CONTROL, NOINVERT
@@ -276,9 +277,8 @@ BEGIN
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
-    "S",            ID_FILE_MYSAVE,         VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
-    "H",            ID_BUTTON_HIGHLIGHT,    VIRTKEY, CONTROL, NOINVERT
 END
 
 

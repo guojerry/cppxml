@@ -107,7 +107,11 @@ BOOL CEnTranscriptionApp::InitInstance()
 
 	CString strCmdLine(m_lpCmdLine);
 	if(!strCmdLine.IsEmpty())
+	{
+		if(m_lpCmdLine[0] == '"')
+			strCmdLine = strCmdLine.Mid(1, strCmdLine.GetLength() - 2);
 		((CMainFrame*)m_pMainWnd)->OpenMediaFile(strCmdLine);
+	}
 	else
 		((CMainFrame*)m_pMainWnd)->ShowTutorial();
 

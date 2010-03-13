@@ -20,13 +20,12 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 //	ON_WM_ERASEBKGND()
-//ON_WM_KEYDOWN()
-ON_COMMAND(ID_PLAY_PREVIOUS, &CMainFrame::OnPlayPrevious)
-ON_COMMAND(ID_PLAY_CONTINUE, &CMainFrame::OnPlayContinue)
-ON_COMMAND(ID_PLAY_REPEAT, &CMainFrame::OnPlayRepeat)
-ON_COMMAND(ID_PLAY_REPEATSLOWLY, &CMainFrame::OnPlayRepeatslowly)
-ON_COMMAND(ID_FILE_MYSAVE, &CMainFrame::OnFileMysave)
-ON_COMMAND(ID_FILE_MY_SAVE_AS, &CMainFrame::OnFileMySaveAs)
+//	ON_WM_KEYDOWN()
+	ON_COMMAND(ID_PLAY_PREVIOUS, &CMainFrame::OnPlayPrevious)
+	ON_COMMAND(ID_PLAY_CONTINUE, &CMainFrame::OnPlayContinue)
+	ON_COMMAND(ID_PLAY_REPEAT, &CMainFrame::OnPlayRepeat)
+	ON_COMMAND(ID_PLAY_REPEATSLOWLY, &CMainFrame::OnPlayRepeatslowly)
+	ON_COMMAND(ID_FILE_MY_SAVE_AS, &CMainFrame::OnFileMySaveAs)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -129,6 +128,12 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 
 BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
 {
+	if(lpszPath == NULL)
+		return FALSE;
+	
+	if(m_wndNavigator.GetPlayingFileName().CompareNoCase(lpszPath) == 0)
+		return TRUE;
+
 	BOOL bRet = m_wndNavigator.OpenMediaFile(lpszPath);
 	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
 	if(pView)
@@ -164,13 +169,9 @@ void CMainFrame::OnPlayRepeatslowly()
 	m_wndNavigator.OnBnClickedBtnSlowrepeat();
 }
 
-void CMainFrame::OnFileMysave()
+void CMainFrame::OnFileMySaveAs()
 {
 	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
 	if(pView)
-		pView->AutoSave(m_wndNavigator.GetPlayingFileName());
-}
-
-void CMainFrame::OnFileMySaveAs()
-{
+		pView->SaveAs(NULL);
 }
