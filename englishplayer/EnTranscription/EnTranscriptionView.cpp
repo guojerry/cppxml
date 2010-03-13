@@ -20,6 +20,7 @@
 IMPLEMENT_DYNCREATE(CEnTranscriptionView, CHtmlEditView)
 
 BEGIN_MESSAGE_MAP(CEnTranscriptionView, CHtmlEditView)
+	ON_WM_CREATE()
 	// Standard printing commands
 //	ON_COMMAND(ID_FILE_PRINT, &CHtmlEditView::OnFilePrint)
 //	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CHtmlEditView::OnFilePrint)
@@ -93,58 +94,72 @@ void CEnTranscriptionView::AutoSave(const CString& szCurrentPlay)
 	}
 }
 
-void CEnTranscriptionView::OnInitialUpdate()
+void CEnTranscriptionView::OpenTranscription(const CString& sFilePath)
 {
+	if(sFilePath.IsEmpty())
+		return;
+
 	TCHAR szFilePath[MAX_PATH] = {0};
-	CString strCmdLine(AfxGetApp()->m_lpCmdLine);
-	if(strCmdLine.IsEmpty())
+	_tcscpy_s(szFilePath, MAX_PATH, (LPCTSTR)sFilePath);
+	CString strCmdLine;
+	CString sFileName = PathFindFileName(szFilePath);
+	PathRemoveFileSpec(szFilePath);
+	PathAppend(szFilePath, HIDDEN_SCRIPT_DIR);
+	if(!PathIsDirectory(szFilePath))
 	{
-		GetModuleFileName(NULL, szFilePath, MAX_PATH);
-		PathRemoveFileSpec(szFilePath);
-		PathAppend(szFilePath, TUTORIAL_FILENAME);
-		strCmdLine = _T("file:///");
-		strCmdLine += szFilePath;
+		CreateDirectory(szFilePath, NULL);
+		SetFileAttributes(szFilePath, FILE_ATTRIBUTE_HIDDEN);
 	}
 	else
 	{
-		_tcscpy_s(szFilePath, MAX_PATH, (LPCTSTR)strCmdLine);
-		strCmdLine.Empty();
-		CString sFileName = PathFindFileName(szFilePath);
-		PathRemoveFileSpec(szFilePath);
-		PathAppend(szFilePath, HIDDEN_SCRIPT_DIR);
-		if(!PathIsDirectory(szFilePath))
+		sFileName += _T(".htm");
+		PathAppend(szFilePath, sFileName);
+		if(PathFileExists(szFilePath))
 		{
-			CreateDirectory(szFilePath, NULL);
-			SetFileAttributes(szFilePath, FILE_ATTRIBUTE_HIDDEN);
-		}
-		else
-		{
-			sFileName += _T(".htm");
-			PathAppend(szFilePath, sFileName);
-			if(PathFileExists(szFilePath))
-			{
-				strCmdLine = _T("file:///");
-				strCmdLine += szFilePath;
-			}
-		}
-		if(strCmdLine.IsEmpty())
-		{
-			GetModuleFileName(NULL, szFilePath, MAX_PATH);
-			PathRemoveFileSpec(szFilePath);
-			PathAppend(szFilePath, TEMPLATE_FILENAME);
 			strCmdLine = _T("file:///");
 			strCmdLine += szFilePath;
 		}
 	}
+	if(strCmdLine.IsEmpty())
+	{
+		GetModuleFileName(NULL, szFilePath, MAX_PATH);
+		PathRemoveFileSpec(szFilePath);
+		PathAppend(szFilePath, TEMPLATE_FILENAME);
+		strCmdLine = _T("file:///");
+		strCmdLine += szFilePath;
+	}
 	Navigate(strCmdLine);
+}
+
+void CEnTranscriptionView::ShowTutorial()
+{
+	TCHAR szFilePath[MAX_PATH] = {0};
+
+	GetModuleFileName(NULL, szFilePath, MAX_PATH);
+	PathRemoveFileSpec(szFilePath);
+	PathAppend(szFilePath, TUTORIAL_FILENAME);
+	CString strCmdLine = _T("file:///");
+	strCmdLine += szFilePath;
+
+	Navigate(strCmdLine);
+}
+
+void CEnTranscriptionView::OnInitialUpdate()
+{
 	CHtmlEditView::OnInitialUpdate();
+}
+
+int CEnTranscriptionView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	return CHtmlEditView::OnCreate(lpCreateStruct);
 }
 
 void CEnTranscriptionView::OnNavigateComplete2(LPCTSTR strURL)
 {
 	CString sURL(strURL);
-	if(sURL.FindOneOf(TUTORIAL_FILENAME) > 0)
-		SetDesignMode(TRUE);
+	int nPos = sURL.Find(TUTORIAL_FILENAME);
+	if(nPos > 0)
+		SetDesignMode(FALSE);
 	else
 		SetDesignMode(TRUE);
 }

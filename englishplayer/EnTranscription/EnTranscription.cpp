@@ -104,6 +104,13 @@ BOOL CEnTranscriptionApp::InitInstance()
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
+
+	CString strCmdLine(m_lpCmdLine);
+	if(!strCmdLine.IsEmpty())
+		((CMainFrame*)m_pMainWnd)->OpenMediaFile(strCmdLine);
+	else
+		((CMainFrame*)m_pMainWnd)->ShowTutorial();
+
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
 	// Enable drag/drop open

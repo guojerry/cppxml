@@ -18,6 +18,7 @@ public:
 // Operations
 public:
 	BOOL OpenMediaFile(LPCTSTR lpszPath);
+	void ShowTutorial();
 
 // Overrides
 public:
