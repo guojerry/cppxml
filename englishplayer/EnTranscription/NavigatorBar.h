@@ -40,6 +40,7 @@ public:
 	virtual void OnUpdateSoundData(double eTime, int nRelEnergy);
 	BOOL OpenMediaFile(LPCTSTR lpszPath);
 	CString GetPlayingFileName();
+	BOOL IsDictation() { return m_bDictation; }
 
 protected:
 	void UpdateUIStatus();
@@ -77,7 +78,6 @@ public:
 	afx_msg void OnVolumePosChanging(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnBnClickedCheckTrans();
 	afx_msg void OnBnClickedBtnContinue();
 	afx_msg void OnBnClickedBtnRepeat();

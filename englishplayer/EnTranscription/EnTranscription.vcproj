@@ -184,7 +184,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /a .\tutorial.htm $(OutDir)&#x0D;&#x0A;copy /a .\template.htm $(OutDir)&#x0D;&#x0A;"
+				CommandLine="copy /y .\tutorial.htm $(OutDir) /a&#x0D;&#x0A;copy /y .\template.htm $(OutDir) /a&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

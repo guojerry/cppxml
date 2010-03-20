@@ -19,6 +19,8 @@ public:
 public:
 	void OpenTranscription(const CString& sFilePath);
 	void ShowTutorial();
+	void SetTimeMarker(double eTime);
+	void HightLightCurrent(double eTime);
 
 // Overrides
 public:
@@ -40,6 +42,8 @@ public:
 #endif
 
 protected:
+	double m_eStartPos;
+	double m_eEndPos;
 
 // Generated message map functions
 protected:
@@ -49,6 +53,35 @@ public:
 	afx_msg void OnButtonColor(UINT);
 	afx_msg void OnButtonHighLight(UINT);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+};
+
+class CDomExplore
+{
+public:
+	CDomExplore(double eTime);
+	CDomExplore(long lCurrChars);
+
+public:
+	void FindTimePos(IHTMLDOMNode* pNode);
+	long GetStartChars() { return m_lStartChars; }
+	long GetEndChars() { return m_lEndChars; }
+	long GetTotalChars() { return m_lTotalChars; }
+	double GetStartPos() { return m_eStartPos; }
+	double GetEndPos() { return m_eEndPos; }
+	double GetNextTimerPos() {return m_eNextTime;}
+
+protected:
+	double m_eTime;
+	double m_eNextTime;
+	double m_eStartPos;
+	double m_eEndPos;
+
+	long m_lCurrentChars;
+	long m_lTotalChars;
+	long m_lStartChars;
+	long m_lEndChars;
+
+	BOOL m_bFindNextMode;
 };
 
 #ifndef _DEBUG  // debug version in EnTranscriptionView.cpp
