@@ -7,6 +7,7 @@
 #include "AudioDoc.h"
 #include "math.h"
 #include "WaveBar.h"
+#include "MainFrm.h"
 #include <algorithm>
 
 #define REFRESH_TIMER			1
@@ -174,12 +175,11 @@ BEGIN_MESSAGE_MAP(CNavigatorBar, CDialogBar)
 	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_VOLUME, &CNavigatorBar::OnVolumePosChanging)
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
-ON_WM_KEYDOWN()
-ON_BN_CLICKED(IDC_CHECK_TRANS, &CNavigatorBar::OnBnClickedCheckTrans)
-ON_BN_CLICKED(IDC_BTN_CONTINUE, &CNavigatorBar::OnBnClickedBtnContinue)
-ON_BN_CLICKED(IDC_BTN_REPEAT, &CNavigatorBar::OnBnClickedBtnRepeat)
-ON_BN_CLICKED(IDC_BTN_SLOWREPEAT, &CNavigatorBar::OnBnClickedBtnSlowrepeat)
-ON_BN_CLICKED(IDC_BTN_PREVIOUS, &CNavigatorBar::OnBnClickedBtnPrevious)
+	ON_BN_CLICKED(IDC_CHECK_TRANS, &CNavigatorBar::OnBnClickedCheckTrans)
+	ON_BN_CLICKED(IDC_BTN_CONTINUE, &CNavigatorBar::OnBnClickedBtnContinue)
+	ON_BN_CLICKED(IDC_BTN_REPEAT, &CNavigatorBar::OnBnClickedBtnRepeat)
+	ON_BN_CLICKED(IDC_BTN_SLOWREPEAT, &CNavigatorBar::OnBnClickedBtnSlowrepeat)
+	ON_BN_CLICKED(IDC_BTN_PREVIOUS, &CNavigatorBar::OnBnClickedBtnPrevious)
 END_MESSAGE_MAP()
 
 void CNavigatorBar::OnBnClickedBtnPlay()
@@ -285,6 +285,12 @@ void CNavigatorBar::UpdateUIStatus()
 		pDictationTime->ShowWindow(m_bDictation ? SW_SHOW : SW_HIDE);
 		CString sEslaped = FormatTime((GetTickCount() - m_dwDictationStartTime) / 1000.0);
 		pDictationTime->SetWindowText(sEslaped);
+	}
+	else
+	{
+		CMainFrame* pMainFrame = (CMainFrame*)AfxGetMainWnd();
+		if(pMainFrame)
+			pMainFrame->HightLightCurrent(eCurrent);
 	}
 
 	int ePos = int(eCurrent * SLIDER_RANGE_MAX / eDuration);
@@ -460,31 +466,6 @@ void CNavigatorBar::SetRepeatB()
 		m_pAudioDoc->Pause();
 	}
 	m_pAudioDoc->SetPosition(m_eDictationStartPos);
-}
-
-void CNavigatorBar::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	if(nChar == VK_ESCAPE && m_pWaveBar)
-	{
-//		m_pWaveBar->EndDrag(FALSE);
-	}
-	else if(nChar == VK_F6)
-	{
-		OnBnClickedBtnPrevious();
-	}
-	else if(nChar == VK_F7)
-	{
-		OnBnClickedBtnContinue();
-	}
-	else if(nChar == VK_F8)
-	{
-		OnBnClickedBtnRepeat();
-	}
-	else if(nChar == VK_F9)
-	{
-		OnBnClickedBtnSlowrepeat();
-	}
-	CDialogBar::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
 void CNavigatorBar::OnBnClickedCheckTrans()

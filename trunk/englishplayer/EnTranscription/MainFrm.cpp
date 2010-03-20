@@ -115,16 +115,6 @@ BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO*
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	if(pMsg && pMsg->message == WM_KEYDOWN)
-	{
-		if( pMsg->wParam == VK_ESCAPE || pMsg->wParam == VK_F7 || 
-			pMsg->wParam == VK_F8 || pMsg->wParam == VK_F9 || pMsg->wParam == VK_F6)
-		{
-			if(m_wndNavigator.SendMessage(WM_KEYDOWN, pMsg->wParam, 0))
-				return TRUE;
-		}
-	}
-
 	return CFrameWnd::PreTranslateMessage(pMsg);
 }
 
@@ -146,8 +136,9 @@ BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
 	BOOL bRet = m_wndNavigator.OpenMediaFile(lpszPath);
 	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
 	if(pView)
+	{
 		pView->OpenTranscription(lpszPath);
-
+	}
 	return bRet;
 }
 
@@ -165,7 +156,21 @@ void CMainFrame::OnPlayPrevious()
 
 void CMainFrame::OnPlayContinue()
 {
+	if(m_wndNavigator.IsDictation())
+	{
+		CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
+		if(pView)
+			pView->SetTimeMarker(m_wndNavigator.GetCurrentPos());
+	}
+
 	m_wndNavigator.OnBnClickedBtnContinue();
+}
+
+void CMainFrame::HightLightCurrent(double eTime)
+{
+	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
+	if(pView)
+		pView->HightLightCurrent(eTime);
 }
 
 void CMainFrame::OnPlayRepeat()
