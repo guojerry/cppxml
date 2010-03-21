@@ -260,6 +260,10 @@
 				RelativePath=".\WaveBar.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\WebPage.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="h"
@@ -332,6 +336,10 @@
 			</File>
 			<File
 				RelativePath=".\WaveBar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WebPage.h"
 				>
 			</File>
 		</Filter>

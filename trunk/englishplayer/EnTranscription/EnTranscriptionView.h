@@ -4,6 +4,7 @@
 
 #pragma once
 
+#define MAX_LINE	32
 
 class CEnTranscriptionView : public CHtmlEditView
 {
@@ -21,10 +22,12 @@ public:
 	void ShowTutorial();
 	void SetTimeMarker(double eTime);
 	void HightLightCurrent(double eTime);
+	void RemoveHighlightDiv();
 
 // Overrides
 public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -32,6 +35,9 @@ protected:
 	virtual void OnInitialUpdate();
 	virtual void OnNavigateComplete2(LPCTSTR strURL);
 	virtual HRESULT OnShowContextMenu(DWORD dwID, LPPOINT ppt, LPUNKNOWN pcmdtReserved, LPDISPATCH pdispReserved);
+	void CreateHighlightDiv(IHTMLDOMNode** pDiv);
+	void ResetHighlightDiv();
+	void ShowHighlightDiv(long idx, const RECT& rc);
 
 	// Implementation
 public:
@@ -44,6 +50,7 @@ public:
 protected:
 	double m_eStartPos;
 	double m_eEndPos;
+	CComPtr<IHTMLDOMNode> m_pHighlightDiv[MAX_LINE];
 
 // Generated message map functions
 protected:
