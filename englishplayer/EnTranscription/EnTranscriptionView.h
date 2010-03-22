@@ -34,10 +34,10 @@ protected:
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnInitialUpdate();
 	virtual void OnNavigateComplete2(LPCTSTR strURL);
+	virtual void OnDocumentComplete(LPCTSTR lpszURL);
 	virtual HRESULT OnShowContextMenu(DWORD dwID, LPPOINT ppt, LPUNKNOWN pcmdtReserved, LPDISPATCH pdispReserved);
-	void CreateHighlightDiv(IHTMLDOMNode** pDiv);
+	void CreateHighlightDiv(IHTMLElement** pDiv, const RECT& rc);
 	void ResetHighlightDiv();
-	void ShowHighlightDiv(long idx, const RECT& rc);
 
 	// Implementation
 public:
@@ -50,7 +50,9 @@ public:
 protected:
 	double m_eStartPos;
 	double m_eEndPos;
-	CComPtr<IHTMLDOMNode> m_pHighlightDiv[MAX_LINE];
+	CComPtr<IHTMLElement> m_pHighlightDiv[MAX_LINE];
+	BOOL m_bAutoSave;
+	BOOL m_bFirstLoad;
 
 // Generated message map functions
 protected:
