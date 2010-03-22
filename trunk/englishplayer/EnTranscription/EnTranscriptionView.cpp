@@ -224,6 +224,12 @@ void CEnTranscriptionView::HightLightCurrent(double eTime)
 	long lOut = 0;
 	HRESULT hr = pBodySelPtr->moveStart(_T("character"), lStartChars, &lOut);
 	hr = pBodySelPtr->moveEnd(_T("character"), lEndChars - lStartChars, &lOut);
+	pBodySelPtr->scrollIntoView();
+
+	long lTop;
+	CComPtr<IHTMLElement2> pEle2Ptr;
+	CALLCOM(pElePtr->QueryInterface(IID_IHTMLElement2, (void**)&pEle2Ptr));
+	pEle2Ptr->get_scrollTop(&lTop);
 
 	CComPtr<IHTMLTextRangeMetrics2> pMetrics2Ptr;
 	CALLCOM(pBodySelPtr->QueryInterface(IID_IHTMLTextRangeMetrics2, (VOID**)&pMetrics2Ptr));
@@ -231,7 +237,8 @@ void CEnTranscriptionView::HightLightCurrent(double eTime)
 	pMetrics2Ptr->getClientRects(&pRects);
 	long lCnt = 0;
 	pRects->get_length(&lCnt);
-	TRACE("Another selection:\r\n");
+	BOOL bIsModified = (GetIsDirty() != S_FALSE);
+	RemoveHighlightDiv();
 	ResetHighlightDiv();
 	for(long i = 0; i < lCnt; i++)
 	{
@@ -251,18 +258,22 @@ void CEnTranscriptionView::HightLightCurrent(double eTime)
 			pActualRect->get_top(&rc.top);
 			pActualRect->get_right(&rc.right);
 			pActualRect->get_bottom(&rc.bottom);
-			TRACE("Rect is: %d, %d, %d, %d\r\n", rc.left, rc.top, rc.right, rc.bottom);
-			ShowHighlightDiv(i, rc);
-
-			//<div style="position: absolute; left: 5px; top: 400px; z-index: -1; background-color: yellow; display: none" id="idYellow"></div>
+			rc.top += lTop;
+			rc.bottom += lTop;
+			if(i < MAX_LINE)
+				CreateHighlightDiv(&m_pHighlightDiv[i], rc);
 		}
 	}
-//	pBodySelPtr->select();
+	pBodySelPtr->collapse(TRUE);
+
+	if(!bIsModified && m_bAutoSave)
+		SendMessage(WM_COMMAND, ID_FILE_SAVE, 0);
 }
 
-void CEnTranscriptionView::CreateHighlightDiv(IHTMLDOMNode** pDiv)
+void CEnTranscriptionView::CreateHighlightDiv(IHTMLElement** pDiv, const RECT& rc)
 {
-	BOOL bIsModified = GetIsDirty() != S_FALSE;
+	if(rc.right - rc.left < 3)
+		return;
 
 	CComPtr<IHTMLDocument2> pDocPtr;
 	GetDHtmlDocument(&pDocPtr);
@@ -277,9 +288,11 @@ void CEnTranscriptionView::CreateHighlightDiv(IHTMLDOMNode** pDiv)
 
 	CComPtr<IMarkupServices> pMarkupService;
 	CALLCOM(pDocPtr->QueryInterface(IID_IMarkupServices, (void**)&pMarkupService));
-	CComPtr<IHTMLElement> pNewEle;
-	pMarkupService->CreateElement(TAGID_DIV, L"id=idYellow style=\"POSITION: absolute; DISPLAY:none; TOP: 5px; LEFT: 10px; WIDTH:20px; background-color: yellow; z-index=-1\"", 
-		&pNewEle);
+	CString sStyle;
+	sStyle.Format(_T("id=idYellow style=\"POSITION: absolute; DISPLAY:none; LEFT: %dpx; TOP: %dpx; WIDTH:%dpx; HEIGHT:%dpx; background-color: yellow; z-index=-1\""),
+		rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
+	CComBSTR bstrStyle = sStyle.AllocSysString();
+	pMarkupService->CreateElement(TAGID_DIV, bstrStyle, pDiv);
 
 	CComQIPtr<IMarkupPointer> pMarkupPointer1;
 	CComQIPtr<IMarkupPointer> pMarkupPointer2;
@@ -291,114 +304,66 @@ void CEnTranscriptionView::CreateHighlightDiv(IHTMLDOMNode** pDiv)
 	pHTMLTxtRange->collapse(FALSE);
 	pMarkupService->MovePointersToRange(pHTMLTxtRange, pMarkupPointer1, pMarkupPointer2);
 
-	pMarkupService->InsertElement(pNewEle, pMarkupPointer1, pMarkupPointer2);
-	bIsModified = GetDocument()->IsModified();
-	GetDocument()->SetModifiedFlag(FALSE);
-	bIsModified = GetDocument()->IsModified();
-	bIsModified = GetDocument()->IsModified();
-
-//	pMarkupService->RemoveElement(pNewEle);
-/*
-	CComPtr<IHTMLElement> pNewEle;
-	pDocPtr->createElement(_T("div"), &pNewEle);
-	if(pNewEle == NULL)
-		return;
-	VARIANT vtVal;
-	vtVal.vt = VT_BSTR;
-	vtVal.bstrVal = _T("idYellow");
-	pNewEle->setAttribute(_T("id"), vtVal);
-	CComPtr<IHTMLStyle> pStyle;
-	pNewEle->get_style(&pStyle);
-	if(pStyle)
-	{
-		vtVal.bstrVal = _T("absolute");
-		pStyle->setAttribute(_T("position"), vtVal);
-		vtVal.bstrVal = _T("yellow");
-		pStyle->setAttribute(_T("background-color"), vtVal);
-		vtVal.bstrVal = _T("inline");
-		pStyle->setAttribute(_T("display"), vtVal);
-		VARIANT vtLong;
-		vtLong.vt = VT_I4;
-		vtLong.lVal = 5;
-		pStyle->setAttribute(_T("left"), vtLong);
-		vtLong.lVal = 100;
-		pStyle->setAttribute(_T("top"), vtLong);
-		vtLong.lVal = 100;
-		pStyle->setAttribute(_T("width"), vtLong);
-		vtLong.lVal = -1;
-		pStyle->setAttribute(_T("z-index"), vtLong);
-	}
-
-	CComPtr<IHTMLDOMNode> pNewDivDom;
-	pNewEle->QueryInterface(IID_IHTMLDOMNode, (void**)&pNewDivDom);
-	pBodyDomPtr->appendChild(pNewDivDom, pDiv);
-	*/
+	pMarkupService->InsertElement(*pDiv, pMarkupPointer1, pMarkupPointer2);
 }
 
 void CEnTranscriptionView::ResetHighlightDiv()
-{
-	for(int i = 0; i < MAX_LINE; i++)
-	{
-		if(m_pHighlightDiv[i] == NULL)
-			CreateHighlightDiv(&m_pHighlightDiv[i]);
-
-		if(m_pHighlightDiv[i] == NULL)
-			continue;
-
-		CComPtr<IHTMLElement> pEle;
-		m_pHighlightDiv[i]->QueryInterface(IID_IHTMLElement, (void**)&pEle);
-		ASSERT(pEle != NULL);
-		if(pEle == NULL)
-			continue;
-		CComPtr<IHTMLStyle> pStyle;
-		pEle->get_style(&pStyle);
-
-		VARIANT vtVal;
-		vtVal.vt = VT_BSTR;
-		vtVal.bstrVal = _T("none");
-		pStyle->setAttribute(_T("display"), vtVal);
-	}
-}
-
-void CEnTranscriptionView::RemoveHighlightDiv()
 {
 	CComPtr<IHTMLDocument2> pDocPtr;
 	GetDHtmlDocument(&pDocPtr);
 	if(pDocPtr == NULL)
 		return;
-	CComPtr<IHTMLElement> pBodyPtr;
-	CALLCOM(pDocPtr->get_body(&pBodyPtr));
-	CComPtr<IHTMLDOMNode> pBodyDomPtr;
-	CALLCOM(pBodyPtr->QueryInterface(IID_IHTMLDOMNode, (void**)&pBodyDomPtr));
-
-	if(pBodyDomPtr == NULL)
-		return;
+	CComPtr<IMarkupServices> pMarkupService;
+	CALLCOM(pDocPtr->QueryInterface(IID_IMarkupServices, (void**)&pMarkupService));
 
 	for(int i = 0; i < MAX_LINE; i++)
 	{
-		CComPtr<IHTMLDOMNode> pDeleted;
-		pBodyDomPtr->removeChild(m_pHighlightDiv[i], &pDeleted);
+		if(m_pHighlightDiv[i] != NULL)
+		{
+			pMarkupService->RemoveElement(m_pHighlightDiv[i]);
+			m_pHighlightDiv[i] = NULL;
+		}
 	}
 }
 
-void CEnTranscriptionView::ShowHighlightDiv(long idx, const RECT& rc)
+void CEnTranscriptionView::RemoveHighlightDiv()
 {
-	if(idx >= MAX_LINE || m_pHighlightDiv[idx] == NULL)
+	if(GetReadyState() != READYSTATE_COMPLETE)
 		return;
 
-	CComPtr<IHTMLElement> pEle;
-	m_pHighlightDiv[idx]->QueryInterface(IID_IHTMLElement, (void**)&pEle);
-	ASSERT(pEle != NULL);
-	if(pEle == NULL)
+	if(!m_bFirstLoad)
 		return;
-	CComPtr<IHTMLStyle> pStyle;
-	pEle->get_style(&pStyle);
 
-	VARIANT vtVal;
-	vtVal.vt = VT_BSTR;
-	vtVal.bstrVal = _T("inline");
-	pStyle->setAttribute(_T("display"), vtVal);
+	m_bFirstLoad = FALSE;
+	CComPtr<IHTMLDocument2> pDocPtr;
+	GetDHtmlDocument(&pDocPtr);
+	if(pDocPtr == NULL)
+		return;
 
+	CComPtr<IMarkupServices> pMarkupService;
+	CALLCOM(pDocPtr->QueryInterface(IID_IMarkupServices, (void**)&pMarkupService));
+
+	CComPtr<IHTMLDocument3> pDoc3Ptr;
+	CALLCOM(pDocPtr->QueryInterface(IID_IHTMLDocument3, (VOID**)&pDoc3Ptr));
+	CComBSTR sHighLightId = SysAllocString(_T("idYellow"));
+	CComPtr<IHTMLElementCollection> pHighlights;
+	pDoc3Ptr->getElementsByName(sHighLightId, &pHighlights);
+
+	LONG lCnt = 0;
+	pHighlights->get_length(&lCnt);
+	for(long i = lCnt; i >= 0; i--)
+	{
+		VARIANT vtVal;
+		vtVal.vt = VT_I4;
+		vtVal.lVal = i;
+		CComPtr<IDispatch> pDisp;
+		pHighlights->item(vtVal, vtVal, &pDisp);
+		CComPtr<IHTMLElement> pEleIt;
+		if(pDisp)
+			pDisp->QueryInterface(IID_IHTMLElement, (void**)&pEleIt);
+
+		pMarkupService->RemoveElement(pEleIt);
+	}
 }
 
 CDomExplore::CDomExplore(double eTime)
@@ -534,6 +499,12 @@ int CEnTranscriptionView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return CHtmlEditView::OnCreate(lpCreateStruct);
 }
 
+void CEnTranscriptionView::OnDocumentComplete(LPCTSTR strURL)
+{
+	m_bFirstLoad = TRUE;
+//	RemoveHighlightDiv();
+}
+
 void CEnTranscriptionView::OnNavigateComplete2(LPCTSTR strURL)
 {
 	CString sURL(strURL);
@@ -546,6 +517,10 @@ void CEnTranscriptionView::OnNavigateComplete2(LPCTSTR strURL)
 		m_eStartPos = 0;
 		m_eEndPos = 0;
 	}
+	nPos = sURL.Find(TEMPLATE_FILENAME);
+	m_bAutoSave = nPos < 0;
+	if(m_bAutoSave)
+		m_bAutoSave = PathFileExists(sURL);
 }
 
 UINT_PTR CALLBACK CdlgHook(  HWND hdlg,UINT uiMsg,WPARAM /*wParam*/, LPARAM lParam)
