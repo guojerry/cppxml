@@ -46,7 +46,7 @@ protected:
 	void UpdateUIStatus();
 	void UpdateVolume();
 	void SetRepeatA();
-	void SetRepeatB();
+	void SetRepeatB(BOOL bAutoPlay = TRUE);
 	void RepeatRecent();
 
 	HICON m_hPlayIcon;

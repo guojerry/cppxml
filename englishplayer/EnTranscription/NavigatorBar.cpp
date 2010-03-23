@@ -338,7 +338,9 @@ void CNavigatorBar::OnTimer(UINT_PTR nIDEvent)
 		}
 
 		if(m_dBreakPoint > 0.001 && m_dBreakPoint < eCur && m_eDictationEndPos < 0.0001)
-			SetRepeatB();
+		{
+			SetRepeatB(FALSE);
+		}
 	}
 
 	CDialogBar::OnTimer(nIDEvent);
@@ -446,13 +448,13 @@ void CNavigatorBar::SetRepeatA()
 	UpdateUIStatus();
 }
 
-void CNavigatorBar::SetRepeatB()
+void CNavigatorBar::SetRepeatB(BOOL bAutoPlay)
 {
 	if(NULL == m_pAudioDoc)
 		return;
 
 	double eCurrPos = GetCurrentPos();
-	if(m_pAudioDoc->GetStatus() == 1 && eCurrPos >= m_eDictationEndPos)
+	if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPlaying && eCurrPos >= m_eDictationEndPos)
 	{
 		m_eDictationEndPos = eCurrPos;
 		double eDuration = m_pAudioDoc->GetDuration();
@@ -461,11 +463,14 @@ void CNavigatorBar::SetRepeatB()
 			m_aSliderProgress.SetBPoint(int(m_eDictationEndPos * SLIDER_RANGE_MAX / eDuration));
 		}
 	}
-	else if(m_pAudioDoc->GetStatus() == 2 && eCurrPos >= m_eDictationEndPos)
+	else if(m_pAudioDoc->GetStatus() == CAudioDoc::eStatusPause && eCurrPos >= m_eDictationEndPos)
 	{
 		m_pAudioDoc->Pause();
 	}
-	m_pAudioDoc->SetPosition(m_eDictationStartPos);
+	if(bAutoPlay)
+		m_pAudioDoc->SetPosition(m_eDictationStartPos);
+	else
+		m_pAudioDoc->Pause();
 }
 
 void CNavigatorBar::OnBnClickedCheckTrans()
