@@ -20,6 +20,7 @@ public:
 	BOOL OpenMediaFile(LPCTSTR lpszPath);
 	void ShowTutorial();
 	void HightLightCurrent(double eTime);
+	void SeekTo(double eTime);
 
 // Overrides
 public:

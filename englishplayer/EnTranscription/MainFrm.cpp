@@ -166,6 +166,11 @@ void CMainFrame::OnPlayContinue()
 	m_wndNavigator.OnBnClickedBtnContinue();
 }
 
+void CMainFrame::SeekTo(double eTime)
+{
+	m_wndNavigator.SeekTo(eTime);
+}
+
 void CMainFrame::HightLightCurrent(double eTime)
 {
 	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());

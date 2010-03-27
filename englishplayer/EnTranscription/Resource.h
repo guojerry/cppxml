@@ -68,14 +68,15 @@
 #define ID_BUTTON_FONT                  32798
 #define ID_BUTTON_COLOR                 32799
 #define ID_FILE_MY_SAVE                 32806
-#define ID_ACCELERATOR32810             32810
+#define ID_TEXT_PLAYCURSOR              32812
+#define ID_BUTTON_GOTOCURSOR            32813
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        150
-#define _APS_NEXT_COMMAND_VALUE         32812
+#define _APS_NEXT_COMMAND_VALUE         32814
 #define _APS_NEXT_CONTROL_VALUE         1016
 #define _APS_NEXT_SYMED_VALUE           102
 #endif
