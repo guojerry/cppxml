@@ -6,6 +6,7 @@
 #include "EnTranscriptionDoc.h"
 #include "EnTranscriptionView.h"
 #include "shlwapi.h"
+#include "MainFrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,6 +37,7 @@ BEGIN_DHTMLEDITING_CMDMAP(CEnTranscriptionView)
 	DHTMLEDITING_CMD_ENTRY(ID_BUTTON_FONT, IDM_FONT)
 	DHTMLEDITING_CMD_ENTRY_FUNC(ID_BUTTON_COLOR, IDM_FONT, &CEnTranscriptionView::OnButtonColor)
 	DHTMLEDITING_CMD_ENTRY_FUNC(ID_BUTTON_HIGHLIGHT, IDM_FONT, &CEnTranscriptionView::OnButtonHighLight)
+	DHTMLEDITING_CMD_ENTRY_FUNC(ID_BUTTON_GOTOCURSOR, IDM_FONT, &CEnTranscriptionView::OnGotoCursor)
 END_DHTMLEDITING_CMDMAP()
 
 // CEnTranscriptionView construction/destruction
@@ -266,8 +268,8 @@ void CEnTranscriptionView::HightLightCurrent(double eTime)
 	}
 	pBodySelPtr->collapse(TRUE);
 
-	if(!bIsModified && m_bAutoSave)
-		SendMessage(WM_COMMAND, ID_FILE_SAVE, 0);
+//	if(!bIsModified && m_bAutoSave)
+//		SendMessage(WM_COMMAND, ID_FILE_SAVE, 0);
 }
 
 void CEnTranscriptionView::CreateHighlightDiv(IHTMLElement** pDiv, const RECT& rc)
@@ -436,9 +438,18 @@ void CDomExplore::FindTimePos(IHTMLDOMNode* pNode)
 				double eTimeTmp = lTimeTmp / 1000.0;
 				if(m_bFindNextMode)
 				{
-					if(m_lCurrentChars < m_lTotalChars && eTimeTmp < m_eNextTime)
+					if(m_lCurrentChars < m_lTotalChars)
 					{
-						m_eNextTime = eTimeTmp;
+						if(eTimeTmp < m_eNextTime)
+						{
+							m_eNextTime = eTimeTmp;
+							m_eEndPos = m_eNextTime;
+						}
+					}
+					else
+					{
+						if(eTimeTmp > m_eStartPos)
+							m_eStartPos = eTimeTmp;
 					}
 				}
 				else
@@ -475,7 +486,7 @@ void CDomExplore::FindTimePos(IHTMLDOMNode* pNode)
 	if(pChildNodePtr != NULL)
 		FindTimePos(pChildNodePtr);
 
-	if(!m_bFindNextMode)
+//	if(!m_bFindNextMode)
 	{
 		if(sNodeName.CompareNoCase(_T("BR")) == 0 || sNodeName.CompareNoCase(_T("P")) == 0)
 		{
@@ -557,6 +568,53 @@ void CEnTranscriptionView::OnButtonColor(UINT)
 		szColor.Format(_T("%.2x%.2x%.2x"),GetRValue(cr),GetGValue(cr),GetBValue(cr));
 		SetForeColor(szColor);
 	}
+}
+
+void CEnTranscriptionView::OnGotoCursor(UINT)
+{
+	HRESULT hr = E_FAIL;
+	CComPtr<IHTMLDocument2> pDocPtr;
+	GetDHtmlDocument(&pDocPtr);
+	if(pDocPtr == NULL)
+		return;
+
+	CComPtr<IHTMLSelectionObject> pSelObjPtr;
+	CComPtr<IDispatch> pTmp;
+	CComPtr<IHTMLTxtRange> pCurSelPtr;
+	if(pDocPtr)
+		pDocPtr->get_selection(&pSelObjPtr);
+
+	if(pSelObjPtr != NULL)
+		hr = pSelObjPtr->createRange(&pTmp);
+
+	if(pTmp != NULL)
+		pTmp->QueryInterface(IID_IHTMLTxtRange, (LPVOID*)&pCurSelPtr);
+	if(pCurSelPtr == NULL)
+		return;
+
+	CComPtr<IHTMLElement> pElePtr;
+	CComPtr<IHTMLBodyElement> pBodyPtr;
+	CALLCOM(pDocPtr->get_body(&pElePtr));
+	CALLCOM(pElePtr->QueryInterface(IID_IHTMLBodyElement, (void**)&pBodyPtr));
+	CComPtr<IHTMLDOMNode> pBodyDomPtr;
+	CALLCOM(pBodyPtr->QueryInterface(IID_IHTMLDOMNode, (void**)&pBodyDomPtr));
+
+	long nMoved = 0;
+	hr = pCurSelPtr->moveStart(_T("character"), -10000000, &nMoved);
+	BSTR bstrTxt;
+	pCurSelPtr->get_text(&bstrTxt);
+	long nUpperLen = _tcslen(bstrTxt);
+	SysFreeString(bstrTxt);
+	pCurSelPtr->collapse(FALSE);
+
+	CDomExplore aDom(nUpperLen);
+	aDom.FindTimePos(pBodyDomPtr);
+
+	double eStartPos = aDom.GetStartPos();
+	eStartPos += 1;
+	CMainFrame* pMainFrame = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	if(pMainFrame)
+		pMainFrame->SeekTo(eStartPos);
 }
 
 HRESULT CEnTranscriptionView::OnShowContextMenu(DWORD dwID,

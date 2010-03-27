@@ -61,6 +61,7 @@ protected:
 public:
 	afx_msg void OnButtonColor(UINT);
 	afx_msg void OnButtonHighLight(UINT);
+	afx_msg void OnGotoCursor(UINT);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 };
 

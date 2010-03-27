@@ -41,6 +41,7 @@ public:
 	BOOL OpenMediaFile(LPCTSTR lpszPath);
 	CString GetPlayingFileName();
 	BOOL IsDictation() { return m_bDictation; }
+	void SeekTo(double pos);
 
 protected:
 	void UpdateUIStatus();

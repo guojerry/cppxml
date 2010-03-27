@@ -407,6 +407,19 @@ double CNavigatorBar::GetCurrentPos()
 	return 0;
 }
 
+void CNavigatorBar::SeekTo(double pos)
+{
+	if(m_pAudioDoc == NULL)
+		return;
+
+	if(!m_pAudioDoc->IsPlaying())
+	{
+		OnBnClickedBtnPlay();
+		m_pAudioDoc->Pause();
+	}
+	SetCurrentPos(pos);
+}
+
 void CNavigatorBar::SetCurrentPos(double pos)
 {
 	if(m_pAudioDoc && m_pAudioDoc->IsPlaying())
