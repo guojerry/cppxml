@@ -21,6 +21,7 @@ public:
 	void ShowTutorial();
 	void HightLightCurrent(double eTime);
 	void SeekTo(double eTime);
+	static CString GetLocaleName();
 
 // Overrides
 public:

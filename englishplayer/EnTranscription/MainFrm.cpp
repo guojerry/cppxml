@@ -8,6 +8,7 @@
 #include "EnTranscriptionDoc.h"
 #include "EnTranscriptionView.h"
 #include "shlwapi.h"
+#include "LocaleTool.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -72,6 +73,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CenterWindow();
 
+	CMenu* pMenu = GetMenu();
+	if(CLocaleTool::Instance())
+		CLocaleTool::Instance()->UpdateMenu(pMenu, MAIN_MENU_GROUP);
 	return 0;
 }
 
@@ -200,4 +204,12 @@ void CMainFrame::OnFileSave()
 	CEnTranscriptionDoc* pDoc = dynamic_cast<CEnTranscriptionDoc*>(GetActiveDocument());
 	if(pDoc)
 		pDoc->OnSaveDocument(pDoc->GetPathName());
+}
+
+CString CMainFrame::GetLocaleName()
+{
+	TCHAR szLocaleName[MAX_PATH] = {0};
+	GetLocaleInfo(LOCALE_USER_DEFAULT , LOCALE_SNAME, szLocaleName, MAX_PATH);
+
+	return szLocaleName;
 }

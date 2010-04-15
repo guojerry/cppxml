@@ -8,6 +8,7 @@
 #include "math.h"
 #include "WaveBar.h"
 #include "MainFrm.h"
+#include "LocaleTool.h"
 #include <algorithm>
 
 #define REFRESH_TIMER			1
@@ -162,6 +163,10 @@ LRESULT CNavigatorBar::OnInitDialog(UINT wParam,LONG lParam)
 		m_aSliderProgress.Init();
 		m_aSliderProgress.SetRange(0, SLIDER_RANGE_MAX);
 	}
+
+	if(CLocaleTool::Instance())
+		CLocaleTool::Instance()->UpdateButtons(this, TOOLBAR_GROUP);
+
 	return 0; 
 }
 
