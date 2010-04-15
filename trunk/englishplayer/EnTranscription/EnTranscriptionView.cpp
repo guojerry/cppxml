@@ -7,6 +7,7 @@
 #include "EnTranscriptionView.h"
 #include "shlwapi.h"
 #include "MainFrm.h"
+#include "LocaleTool.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -105,9 +106,19 @@ void CEnTranscriptionView::ShowTutorial()
 
 	GetModuleFileName(NULL, szFilePath, MAX_PATH);
 	PathRemoveFileSpec(szFilePath);
-	PathAppend(szFilePath, TUTORIAL_FILENAME);
+
+	TCHAR szLocalePath[MAX_PATH] = {0};
+	_tcscpy_s(szLocalePath, MAX_PATH, szFilePath);
+	PathAppend(szLocalePath, CMainFrame::GetLocaleName());
+	PathAppend(szLocalePath, TUTORIAL_FILENAME);
 	CString strCmdLine = _T("file:///");
-	strCmdLine += szFilePath;
+	if(PathFileExists(szLocalePath))
+		strCmdLine += szLocalePath;
+	else
+	{
+		PathAppend(szFilePath, TUTORIAL_FILENAME);
+		strCmdLine += szFilePath;
+	}
 
 	Navigate(strCmdLine);
 }
@@ -150,8 +161,12 @@ void CEnTranscriptionView::SetTimeMarker(double eTime)
 	hr = pCurSelPtr->moveStart(_T("character"), -10000000, &nMoved);
 	BSTR bstrTxt;
 	pCurSelPtr->get_text(&bstrTxt);
-	long nUpperLen = _tcslen(bstrTxt);
-	SysFreeString(bstrTxt);
+	long nUpperLen = 0;
+	if(bstrTxt != NULL)
+	{
+		nUpperLen = _tcslen(bstrTxt);
+		SysFreeString(bstrTxt);
+	}
 	pCurSelPtr->collapse(FALSE);
 
 	CDomExplore aDom(nUpperLen);
@@ -625,6 +640,8 @@ HRESULT CEnTranscriptionView::OnShowContextMenu(DWORD dwID,
 	CMenu pMenuMain;
 	pMenuMain.LoadMenu(MAKEINTRESOURCE(IDR_TEXT_POPUP));
 	CMenu *pPopup = pMenuMain.GetSubMenu(0);
+	if(CLocaleTool::Instance())
+		CLocaleTool::Instance()->UpdateMenu(pPopup , RIGHT_MENU_GROUP);
 
 	// enable/disable items based on the status of the command
 	UINT nCount = pPopup->GetMenuItemCount();

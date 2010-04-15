@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LocaleTool.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MainFrm.cpp"
 				>
 			</File>
@@ -300,6 +304,10 @@
 			</File>
 			<File
 				RelativePath=".\fe_warp_inverse_linear.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LocaleTool.h"
 				>
 			</File>
 			<File

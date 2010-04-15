@@ -68,7 +68,6 @@ protected:
 	DWORD m_dwDictationStartTime;
 	double m_eLastBreakPointTime;
 	CString m_sPlayingFileName;
-
 public:
 	afx_msg void OnBnClickedBtnPlay();
 	afx_msg LRESULT OnInitDialog(UINT wParam,LONG lParam);
