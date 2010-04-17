@@ -13,7 +13,7 @@ BEGIN_MESSAGE_MAP(CBmpSlider, CStatic)
 	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
-//RGB(239,236,231)
+#define BK_TRANSPARENT		RGB(0,255,0)
 
 //////////////////////////////////////////////////////////////////////////
 // CBmpSlider
@@ -89,17 +89,18 @@ void CBmpSlider::DrawBK(CDC *pDC)
 	int height = wndRect.Height();
 	int width = wndRect.Width();
 	//Draw background, and do the stretch separately for left, center and right, or the edge is ugly.
-	panleDC.StretchBlt(0, 0, 10, height, &m_progressRightDC, 0, 0, 10, m_bmpSize.cy, SRCCOPY);
-	panleDC.StretchBlt(10, 0, width - 10, height, &m_progressRightDC, 10, 0, m_bmpSize.cx - 20, m_bmpSize.cy, SRCCOPY);
-	panleDC.StretchBlt(width - 10, 0, 10, height, &m_progressRightDC, m_bmpSize.cx - 10, 0, 10, m_bmpSize.cy, SRCCOPY);
+	panleDC.FillSolidRect(wndRect, GetSysColor(COLOR_BTNFACE));
+	panleDC.TransparentBlt(0, 0, 10, height, &m_progressRightDC, 0, 0, 10, m_bmpSize.cy, BK_TRANSPARENT);
+	panleDC.TransparentBlt(10, 0, width - 10, height, &m_progressRightDC, 10, 0, m_bmpSize.cx - 20, m_bmpSize.cy, BK_TRANSPARENT);
+	panleDC.TransparentBlt(width - 10, 0, 10, height, &m_progressRightDC, m_bmpSize.cx - 10, 0, 10, m_bmpSize.cy, BK_TRANSPARENT);
 
 	int nWidth = m_bmpSize.cx * (m_nSliderIndex - m_nRangeMin) / (m_nRangeMax - m_nRangeMin);
 	int nSliderPos = width * (m_nSliderIndex - m_nRangeMin) / (m_nRangeMax - m_nRangeMin);
 	int nLeft = nSliderPos < 10 ? nSliderPos : 10;
 	int nRemain = nSliderPos - nLeft;
-	panleDC.StretchBlt(0, 0, nLeft, height, &m_progressLeftDC, 0, 0, nLeft, m_bmpSize.cy, SRCCOPY);
+	panleDC.TransparentBlt(0, 0, nLeft, height, &m_progressLeftDC, 0, 0, nLeft, m_bmpSize.cy, BK_TRANSPARENT);
 	if(nRemain > 0)
-		panleDC.StretchBlt(nLeft, 0, nRemain, height, &m_progressLeftDC, nLeft, 0, m_bmpSize.cx - 20, m_bmpSize.cy, SRCCOPY);
+		panleDC.TransparentBlt(nLeft, 0, nRemain, height, &m_progressLeftDC, nLeft, 0, m_bmpSize.cx - 20, m_bmpSize.cy, BK_TRANSPARENT);
 
 	int nRepeatA = (m_nAPos - m_nRangeMin) * width / (m_nRangeMax - m_nRangeMin);
 	int nRepeatY = 3 * height / m_bmpSize.cy;
@@ -122,11 +123,11 @@ void CBmpSlider::DrawBK(CDC *pDC)
 	CDC* pSrcKnob = m_bPassSlider ? &m_sliderPassDC : &m_sliderNormalDC;
 	if (nSliderPos + 10 > width)
 	{
-		panleDC.TransparentBlt(width - 10, nMargin, 10, 10, pSrcKnob, 0, 0, 10, 10, RGB(0,255,0));
+		panleDC.TransparentBlt(width - 10, nMargin, 10, 10, pSrcKnob, 0, 0, 10, 10, BK_TRANSPARENT);
 	}
 	else
 	{
-		panleDC.TransparentBlt(nSliderPos, nMargin, 10, 10, pSrcKnob, 0, 0, 10, 10, RGB(0,255,0));
+		panleDC.TransparentBlt(nSliderPos, nMargin, 10, 10, pSrcKnob, 0, 0, 10, 10, BK_TRANSPARENT);
 	}
 
 	//Draw out
