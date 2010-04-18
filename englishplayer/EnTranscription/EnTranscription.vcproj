@@ -237,6 +237,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\mdump.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\NavigatorBar.cpp"
 				>
 			</File>
@@ -312,6 +316,10 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mdump.h"
 				>
 			</File>
 			<File

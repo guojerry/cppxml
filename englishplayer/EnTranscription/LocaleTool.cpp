@@ -234,3 +234,39 @@ void CLocaleTool::UpdateButtons(CWnd* pDlg, LPCTSTR lpszGroupName)
 			pItemWnd->SetWindowText(item.sTitle);
 	}
 }
+
+CString CLocaleTool::LoadString(DWORD dwResID, LPCTSTR lpszDefault, LPCTSTR lpszGroupName)
+{
+	CString sRet(lpszDefault);
+	if(lpszGroupName == NULL)
+	{
+		ASSERT(FALSE);
+		return sRet;
+	}
+
+	LOCALEITEMLIST* pItemList = NULL;
+	SECTIONLIST::iterator it = m_lSections.begin();
+	for(; it != m_lSections.end(); it++)
+	{
+		if(it->first.CompareNoCase(lpszGroupName) == 0)
+		{
+			pItemList = &(it->second);
+			break;
+		}
+	}
+	if(pItemList == NULL)
+		return sRet;
+
+	LOCALEITEMLIST::iterator itItem = pItemList->begin();
+	for(; itItem != pItemList->end(); itItem++)
+	{
+		CLocaleItem& item = *itItem;
+		if(item.dwResID == dwResID)
+		{
+			sRet = item.sTitle;
+			break;
+		}
+	}
+
+	return sRet;
+}
