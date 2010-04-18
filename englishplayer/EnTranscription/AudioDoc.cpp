@@ -9,6 +9,7 @@
 #include "AudioDoc.h"
 #include "AudioProcess.h"
 #include "AudioTimeScale.h"
+#include "mp3parse.h"
 
 #pragma comment(lib, "strmiids.lib")
 
@@ -35,6 +36,7 @@ CAudioDoc::CAudioDoc(IAudioDocSink* pSink)
 	m_pMS = 0;
 	m_pMP = 0;
 	m_pTimeScale = NULL;
+	m_pParser = NULL;
 	m_pGrabberF = 0;	
 	m_pGrabber = 0;
 	m_pSink = pSink;
@@ -77,6 +79,7 @@ HRESULT CAudioDoc::CloseMap()
 	SAFE_RELEASE(m_pMC);
 	SAFE_RELEASE(m_pGB);
 	SAFE_RELEASE(m_pTimeScale);
+	SAFE_RELEASE(m_pParser);
 	
 	m_bufferIndex = 0;
 	m_currentSampleBufferIndex = 0;
@@ -110,6 +113,12 @@ HRESULT CAudioDoc::MapFile(LPCWSTR wFile)
 
 	if(SUCCEEDED(hr))
     {
+		m_pParser = (CWavDestFilter*)CWavDestFilter::CreateInstance(NULL, &hr);
+		if(m_pParser != NULL)
+		{
+			m_pParser->AddRef();
+			JIF(m_pGB->AddFilter(m_pParser, _T("MP3 Parser Filter")));
+		}
 		// Automatically render the file and establish the graph
         JIF(m_pGB->RenderFile(wFile, NULL));
 

@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)\include;$(SolutionDir)\BaseClasses"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\include&quot;;&quot;$(SolutionDir)\BaseClasses&quot;;&quot;$(SolutionDir)MP3Parser&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;INTEGER_SAMPLES"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Winmm.lib strmbased.lib soundtouchd.lib"
+				AdditionalDependencies="Winmm.lib strmbased.lib soundtouchd.lib mp3parserd.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
@@ -131,7 +131,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)baseclasses&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)include&quot;;&quot;$(SolutionDir)baseclasses&quot;;&quot;$(SolutionDir)MP3Parser&quot;"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;INTEGER_SAMPLES"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -154,7 +154,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Winmm.lib strmbase.lib soundtouch.lib"
+				AdditionalDependencies="Winmm.lib strmbase.lib soundtouch.lib mp3parser.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(SolutionDir)lib"
