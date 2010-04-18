@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "EnTranscription.h"
 #include "MainFrm.h"
+#include "mdump.h"
 
 #include "EnTranscriptionDoc.h"
 #include "EnTranscriptionView.h"
@@ -52,6 +53,8 @@ BOOL CEnTranscriptionApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();
+
+	CMiniDumper theDumper(_T("EnglishPlayer"));
 
 	if (!AfxSocketInit())
 	{

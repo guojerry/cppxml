@@ -7,6 +7,7 @@ using namespace std;
 #define MAIN_MENU_GROUP		_T("MainMenu")
 #define RIGHT_MENU_GROUP	_T("RightMenu")
 #define TOOLBAR_GROUP		_T("Buttons")
+#define STRINGS_GROUP		_T("Texts")
 
 class CLocaleItem
 {
@@ -29,6 +30,7 @@ public:
 	static CString GetDefaultLocale();
 	void UpdateMenu(CMenu* pMenu, LPCTSTR lpszGroupName);
 	void UpdateButtons(CWnd* pDlg, LPCTSTR lpszGroupName);
+	CString LoadString(DWORD dwResID, LPCTSTR lpszDefault = _T(""), LPCTSTR lpszGroupName = STRINGS_GROUP);
 
 protected:
 	void Load();
