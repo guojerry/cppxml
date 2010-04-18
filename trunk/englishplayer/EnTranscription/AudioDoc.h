@@ -37,6 +37,7 @@ void Msg(TCHAR *szFormat, ...);
 
 class CAudioProcess;
 class CAudioTimeScale;
+class CWavDestFilter;
 class IAudioDocSink
 {
 public:
@@ -142,6 +143,7 @@ private:
 	REFTIME m_stopTime;
 	CAudioProcess* m_Processer;
 	CAudioTimeScale* m_pTimeScale;
+	CWavDestFilter* m_pParser;
 };
 
 #endif
