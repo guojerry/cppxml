@@ -39,6 +39,7 @@ public:
 	virtual void OnStatusChange();
 	virtual void OnUpdateSoundData(double eTime, int nRelEnergy);
 	BOOL OpenMediaFile(LPCTSTR lpszPath);
+	void PlayAnyway();
 	CString GetPlayingFileName();
 	BOOL IsDictation() { return m_bDictation; }
 	void SeekTo(double pos);
@@ -68,6 +69,7 @@ protected:
 	DWORD m_dwDictationStartTime;
 	double m_eLastBreakPointTime;
 	CString m_sPlayingFileName;
+	float m_nRate;
 public:
 	afx_msg void OnBnClickedBtnPlay();
 	afx_msg LRESULT OnInitDialog(UINT wParam,LONG lParam);
@@ -83,4 +85,5 @@ public:
 	afx_msg void OnBnClickedBtnRepeat();
 	afx_msg void OnBnClickedBtnSlowrepeat();
 	afx_msg void OnBnClickedBtnPrevious();
+	afx_msg void OnCbnSelchangeComboSpeed();
 };

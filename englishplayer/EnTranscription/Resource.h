@@ -35,6 +35,7 @@
 #define IDC_BTN_CONTINUE                1006
 #define IDC_TIMESPAN                    1007
 #define IDC_COMBO1                      1008
+#define IDC_COMBO_SPEED                 1008
 #define IDC_STATIC_VOLUME               1009
 #define IDC_STATIC_SPEED                1010
 #define IDC_BTN_REPEAT                  1011

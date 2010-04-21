@@ -135,7 +135,10 @@ BOOL CMainFrame::OpenMediaFile(LPCTSTR lpszPath)
 		return FALSE;
 	
 	if(m_wndNavigator.GetPlayingFileName().CompareNoCase(lpszPath) == 0)
+	{
+		m_wndNavigator.PlayAnyway();
 		return TRUE;
+	}
 
 	BOOL bRet = m_wndNavigator.OpenMediaFile(lpszPath);
 	CEnTranscriptionView* pView = dynamic_cast<CEnTranscriptionView*>(GetActiveView());
