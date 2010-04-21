@@ -16,6 +16,9 @@
 #define CONTINUE_REPEATTIME		0.4
 #undef SubclassWindow
 
+#define ID_COMBO_SPEED_NORMAL			300
+#define ID_COMBO_SPEED_SLOW				301
+
 // CNavigatorBar Dialog
 IMPLEMENT_DYNAMIC(CNavigatorBar, CDialog)
 
@@ -43,6 +46,7 @@ CNavigatorBar::CNavigatorBar(CWnd* pParent /*=NULL*/)
 	m_bIsPlayIcon = TRUE;
 	m_dwDictationStartTime = 0;
 	m_eLastBreakPointTime = 0;
+	m_nRate = 0;
 }
 
 CNavigatorBar::~CNavigatorBar()
@@ -137,6 +141,17 @@ LRESULT CNavigatorBar::OnInitDialog(UINT wParam,LONG lParam)
 	CButton* pDictation = (CButton*)GetDlgItem(IDC_CHECK_TRANS);
 	pDictation->SetCheck(m_bDictation);
 
+	CComboBox* pSpeed = (CComboBox*)GetDlgItem(IDC_COMBO_SPEED);
+	if(pSpeed)
+	{
+		CString sTmp = CLocaleTool::Instance()->LoadString(ID_COMBO_SPEED_NORMAL, _T("Normal"));
+		pSpeed->InsertString(0, sTmp);
+		sTmp = CLocaleTool::Instance()->LoadString(ID_COMBO_SPEED_SLOW, _T("Slow"));
+		pSpeed->InsertString(1, sTmp);
+		pSpeed->SetCurSel(0);
+		m_nRate = 0;
+	}
+
 	m_pWaveBar = new CWaveBar(this);
 	CRect rect;
 	GetClientRect(&rect);
@@ -185,7 +200,17 @@ BEGIN_MESSAGE_MAP(CNavigatorBar, CDialogBar)
 	ON_BN_CLICKED(IDC_BTN_REPEAT, &CNavigatorBar::OnBnClickedBtnRepeat)
 	ON_BN_CLICKED(IDC_BTN_SLOWREPEAT, &CNavigatorBar::OnBnClickedBtnSlowrepeat)
 	ON_BN_CLICKED(IDC_BTN_PREVIOUS, &CNavigatorBar::OnBnClickedBtnPrevious)
+	ON_CBN_SELCHANGE(IDC_COMBO_SPEED, &CNavigatorBar::OnCbnSelchangeComboSpeed)
 END_MESSAGE_MAP()
+
+void CNavigatorBar::PlayAnyway()
+{
+	if(m_pAudioDoc == NULL)
+		return;
+
+	if(m_pAudioDoc->GetStatus() != CAudioDoc::eStatusPlaying)
+		OnBnClickedBtnPlay();
+}
 
 void CNavigatorBar::OnBnClickedBtnPlay()
 {
@@ -204,6 +229,11 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 		m_pAudioDoc->Play();
 		m_aSliderProgress.SetAPoint(0);
 		m_aSliderProgress.SetBPoint(0);
+		CComboBox* pSpeed = (CComboBox*)GetDlgItem(IDC_COMBO_SPEED);
+		if(pSpeed)
+			pSpeed->SetCurSel(0);
+		m_nRate = 0;
+
 		UpdateVolume();
 		UpdateUIStatus();
 		Sleep(0);
@@ -223,7 +253,7 @@ void CNavigatorBar::OnBnClickedBtnPlay()
 	}
 
 	if(m_pAudioDoc)
-		m_pAudioDoc->SetRate(0);
+		m_pAudioDoc->SetRate(m_nRate);
 
 	UpdateUIStatus();
 }
@@ -524,7 +554,7 @@ void CNavigatorBar::OnBnClickedBtnContinue()
 	if(m_pAudioDoc == NULL)
 		return;
 
-	m_pAudioDoc->SetRate(0);
+	m_pAudioDoc->SetRate(m_nRate);
 	if(m_bDictation)
 		SetRepeatA();
 	else
@@ -596,7 +626,7 @@ void CNavigatorBar::OnBnClickedBtnRepeat()
 	if(m_pAudioDoc == NULL)
 		return;
 
-	m_pAudioDoc->SetRate(0);
+	m_pAudioDoc->SetRate(m_nRate);
 	if(m_bDictation)
 		SetRepeatB();
 	else
@@ -653,4 +683,21 @@ void CNavigatorBar::OnBnClickedBtnPrevious()
 CString CNavigatorBar::GetPlayingFileName()
 {
 	return m_sPlayingFileName;
+}
+
+void CNavigatorBar::OnCbnSelchangeComboSpeed()
+{
+	if(m_pAudioDoc == NULL)
+		return;
+
+	CComboBox* pSpeed = (CComboBox*)GetDlgItem(IDC_COMBO_SPEED);
+	if(pSpeed && pSpeed->GetCurSel() == 1)
+	{
+		m_nRate = -30;
+	}
+	else
+	{
+		m_nRate = 0;
+	}
+	m_pAudioDoc->SetRate(m_nRate);
 }
